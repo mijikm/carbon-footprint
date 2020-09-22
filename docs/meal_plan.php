@@ -1,7 +1,7 @@
 <?php
 define("DB_server","localhost");
 define("DB_user","root");
-define("DB_password",""); //toor33
+define("DB_password",""); 
 define("DB_name","phpmyadmin");
 function db_connect(){
     $connection = mysqli_connect(DB_server,DB_user,DB_password,DB_name);
