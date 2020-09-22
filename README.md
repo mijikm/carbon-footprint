@@ -14,7 +14,6 @@ A full-stack web application using XAMPP stack, this app allows you to check you
 
 
 ### Demo
-Click on the GIF below to start navigating.</br>
 [<img style="float: left" width="500" src="images/carbon_footprint.gif">](https://github.com/mijikm/carbon-footprint/tree/master/images)
 </br>
 
