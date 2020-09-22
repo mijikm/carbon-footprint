@@ -400,7 +400,7 @@
                     <div class ="12u align-center carbonBanner">
                         <a href="meal_plan.php" class="image effect"><img src="images/carbon_banner.png" width="500" alt="Meal Planning" /></a>
                         <div class="centered">
-                            <a style="color: #ffffff" href="meal_plan.php">Build your low carbon footprint recipes</a>
+                            <a style="color: #ffffff" href="meal_plan.php">Let's build low foodprint recipes</a>
                         </div>
                     </div>
                 </div> 	<!-- 1st Container -->
