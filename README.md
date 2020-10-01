@@ -14,7 +14,7 @@ A full-stack web application using XAMPP stack, this app allows you to check you
 
 
 ### Demo
-[<img style="float: left" width="500" src="images/eat_healthy_demo.gif">](https://github.com/mijikm/carbon-footprint/blob/master/images/eat_healthy_demo.gif)
+[<img style="float: left" width="600" src="images/eat_healthy_demo.gif">](https://github.com/mijikm/carbon-footprint/blob/master/images/eat_healthy_demo.gif)
 </br>
 
 
