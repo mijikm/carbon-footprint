@@ -6,7 +6,7 @@ The purpose of this project is to improve Australian residents' awareness of eat
 
 
 ### Version
-22 September 2020
+1 October 2020
 
 
 ### Design & Implementation
@@ -14,7 +14,7 @@ A full-stack web application using XAMPP stack, this app allows you to check you
 
 
 ### Demo
-[<img style="float: left" width="500" src="images/carbon_footprint.gif">](https://github.com/mijikm/carbon-footprint/tree/master/images)
+[<img style="float: left" width="500" src="images/eat_healthy_demo.gif">](https://github.com/mijikm/carbon-footprint/tree/master/images)
 </br>
 
 
