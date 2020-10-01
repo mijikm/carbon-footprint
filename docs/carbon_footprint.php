@@ -1,7 +1,7 @@
 <?php
     define("DB_server","localhost");
     define("DB_user","root");
-    define("DB_password","");
+    define("DB_password",""); //toor33
     define("DB_name","phpmyadmin");
     function db_connect(){
         $connection = mysqli_connect(DB_server,DB_user,DB_password,DB_name);
@@ -41,6 +41,7 @@
 -->
 <html>
 	<head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 		<title>Carbon Footprint - Trailblazers</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <!-- Slideshow -->
@@ -53,6 +54,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         <script src=https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
+
         <script src="js/skel.min.js"></script>
 		<script src="js/skel-layers.min.js"></script>
 		<script src="js/init.js"></script>
@@ -407,7 +409,170 @@
 
             </div> 	<!-- main wrapper -->
 
-       		<!-- Footer -->
+        <!-- Banner <div class ="12u align-center">
+                <a href="meal_plan.php" class="image effect"><img src="images/nutrient.png" height="200" alt="Meal Planning" /></a>
+                <p>Build your low carbon footprint recipes</p>
+            </div>-->
+
+
+                <!--
+                <div class="row">
+                    <div class ="6u">
+                        <h3>TOP FOODS HIGHEST IN SELECTED NUTRIENT</h3>
+                        <p>Research suggests that some packaged foods generate lower carbon footprint than
+                            organic foods across the food supply chain. Hence, it is important to know the nutrient
+                            density of the selected foods to reduce the individual carbon footprint
+                            as well as eat the right nutrients. </p>
+                        <h5>Choose nutrient&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+                        <div>
+                            <select id="nutrient" onchange="filterNutrient()">
+                                <option value="Select">Select</option>
+                                <option value="Calcium_mg">Calcium</option>
+                                <option value="Carb_g">Carb</option>
+                                <option value="Fat_g">Fat</option>
+                                <option value="Fiber_g">Fiber</option>
+                                <option value="Protein_g">Protein</option>
+                                <option value="Sugar_g">Sugar</option>
+                                <option value="VitA_mcg">Vitamin A</option>
+                                <option value="VitC_mg">Vitamin C</option>
+                                <option value="VitE_mg">Vitamin E</option>
+                            </select>
+                        </div>
+                        <br>
+
+                        <br>
+                        <ul class="actions">
+                            <li><a class="button alt" onclick="validateInput2()">Submit</a></li>
+                        </ul>
+                    </div>
+                    <div class="6u">
+                        <canvas id="myChart2" width="100" height="60"></canvas>
+                    </div>
+                    <br><br>
+                </div> -->
+                    <!--
+                    <script type ="text/javascript">
+                        var original_data = ;
+                        var food_data = original_data;
+                        var data_filter = "";
+                        var select_nutrient = "";
+                        var myChart2;
+                        var chartExist2 = false;
+                        var topLimit;
+
+                        function filterNutrient() {
+                            select_nutrient = document.getElementById("nutrient").value;
+                        }
+
+                        function validateInput2() {
+                            if (select_nutrient.length > 0 && document.getElementById("nutrient").value != "Select" &&
+                                chartExist2 === true)  {
+                                myChart2.destroy();
+                                food_data = food_data.filter(d => d.nutrient === select_nutrient);
+
+                                showFood2();
+                            } else if (select_nutrient.length > 0 && document.getElementById("nutrient").value != "Select") {
+                                food_data = food_data.filter(d => d.nutrient === select_nutrient);
+
+                                showFood2();
+                            }
+                        }
+
+                        function showFood2() {
+                            // descending order
+                            food_data.sort(function(a, b) {
+                                return b.value - a.value;
+                            });
+
+                            topLimit = 10;
+                            for (var i=0; i<10;i++){
+                                if (food_data[i].value === '0') {
+                                    topLimit = i;
+                                    break;
+                                }
+                            }
+
+                            var top_ten = food_data.slice(0,topLimit);
+                            var top_emission = [];
+                            for (var i in top_ten) {
+                                for(var j=0; j<original_data.length;j++) {
+                                    //console.log(dataset[j]);
+                                    if(top_ten[i].food_name === original_data[j].food_name &&
+                                    original_data[j].nutrient === "sum_emission") {
+                                        top_emission.push(original_data[j].value);
+                                    } else {continue;}
+                                }
+                            }
+                            //console.log(top_emission);
+                            var chart_x = [];
+                            var description_x = [];
+                            var chart_y = [];
+                            var splitNutrient = select_nutrient.substr(0,select_nutrient.indexOf('_'));
+                            var splitUnit = select_nutrient.split("_").pop();
+
+                            for(var i in top_ten) {
+                                description_x.push(top_ten[i].descrip);
+                                var splitString = top_ten[i].food_name
+                                chart_x.push(splitString); // get food name
+                                chart_y.push(top_ten[i].value);
+                            }
+
+                            var ctx2 = document.getElementById('myChart2').getContext('2d');
+                            var config2 = {
+                                type: 'bar',
+                                data: {
+                                    labels: chart_x,
+                                    tooltipText: description_x,
+                                    datasets: [{
+                                        label:  splitNutrient + ' per 100g of Food',
+                                        data: chart_y,
+                                        // bootstrap colors
+                                        // https://i.pinimg.com/originals/b8/70/f6/b870f6c3cf2f275906616de26cffaa52.png
+                                        backgroundColor: 'rgba(76,175,80,0.7)',
+                                        //hoverBackgroundColor: 'rgba(255,152,0,0.7)'
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                //min: 0, //actual 0
+                                                //max: 800 //actual is 707
+                                                callback: function(value, index, values){
+                                                    return value + splitUnit ;
+                                                }
+                                            }
+                                        }]
+                                    },
+                                    responsive: true,
+                                    tooltips: {
+                                        callbacks: {
+                                            title: function(tooltipItem, data) {
+                                                var title = data.tooltipText[tooltipItem[0].index];
+                                                return title;
+                                            },
+                                            afterLabel: function(tooltipItem, data) {
+                                                var top = "CO2 per 100g: " + top_emission[tooltipItem.index];
+                                                return top;
+                                            }
+                                        }
+                                    }
+
+                                }
+                            };
+                            Chart.defaults.global.defaultFontSize = 14;
+                            myChart2 = new Chart(ctx2, config2);
+                            chartExist2 = true;
+                            // reset data
+                            console.log(chart_x);
+                            //showTable(food_data);
+                            food_data = original_data;
+                        }
+
+                    </script> -->
+
+
+		<!-- Footer -->
 			<footer id="footer">
 				<div class="container">
 					<ul class="copyright">
