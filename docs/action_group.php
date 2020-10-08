@@ -20,7 +20,7 @@ function fill_select_box($connect, $food_group)
 
     foreach($result as $row)
     {
-        $output .= '<option value="'.$row["food_name"].'">'.$row["food_name"].'</option>';
+        $output .= '<option data-tokens="'.$row["food_name"].'">'.$row["food_name"].'</option>';
     }
 
     return $output;

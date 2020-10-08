@@ -1,7 +1,7 @@
 <?php
 define("DB_server","localhost");
 define("DB_user","root");
-define("DB_password",""); //toor33
+define("DB_password","toor33"); //toor33
 define("DB_name","phpmyadmin");
 function db_connect(){
     $connection = mysqli_connect(DB_server,DB_user,DB_password,DB_name);
@@ -64,28 +64,22 @@ function fill_select_box(){
     <title>Meal Planning - Trailblazers</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
-    <!-- jQuery library -->
     <script src="js/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
     <script src="js/skel.min.js"></script>
     <script src="js/skel-layers.min.js"></script>
     <script src="js/init.js"></script>
     <script src="js/Chart.min.js"></script>
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- autosave plugin -->
     <script src="js/savy.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-
         $(document).ready(function(){
             $(function(){
                 $('.auto_save').savy('load');
-            });
-            $('.selectpicker').selectpicker({
-                style: 'btn-default',
-                size: false,
-                //width: 'fit'
             });
 
             $('[data-toggle="tooltip"]').tooltip();
@@ -128,7 +122,6 @@ function fill_select_box(){
             var count = 0;
             var bmr;
             var nutriArray;
-            var isValid = false;
 
             $(document).on('click', '.add', function(){
                 var tab_id = $('.tab-content .active').attr('id');
@@ -141,21 +134,18 @@ function fill_select_box(){
                 }
                 count++;
                 var html = '';
-
                 html += '<tr>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="" selected disabled>Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="" selected disabled>Select Food</option></select></td>';
-                html += '<td><input name="item_weight" class="form-control item_weight selectpicker" data-sub_category_id="'+count+'" placeholder="Enter" type="number" min="0.01" step="0.01" id="item_weight'+count+'" required></td>';
-                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option value="" selected disabled>Select g/kg</option>\n' +
-                    '                        <option data-tokens="g">g</option>\n' +
-                    '                        <option data-tokens="kg">kg</option></select></td>';
+                html += '<td><select name="item_category[]" class="form-control item_category" data-sub_category_id="'+count+'" required><option value="" selected disabled>Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
+                html += '<td><select name="item_sub_category[]" class="form-control item_sub_category" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option value="" selected disabled>Select Food</option></select></td>';
+                html += '<td><input name="item_weight" class="form-control item_weight" data-sub_category_id="'+count+'" placeholder="Enter" type="number" min="0.01" step="0.01" id="item_weight'+count+'" required></td>';
+                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit" data-sub_category_id="'+count+'" required><option value="" selected disabled>Select g/kg</option>\n' +
+                    '                        <option value="g">g</option>\n' +
+                    '                        <option value="kg">kg</option></select></td>';
                 html += '<td><output class="item_emissions" id="item_emissions'+count+'"></output></td>'
                 html += '<td><output class="item_calories" id="item_calories'+count+'"></output></td>'
                 html += '<td><button type="button" name="remove" class="align-center btn btn-danger btn-xs remove"><span class="glyphicon glyphicon-minus"></span></button></td>';
                 $('#'+tab_id).append(html);
-                $('.selectpicker').selectpicker('refresh');
                 console.log(tab_id);
-
             });
 
 
@@ -176,14 +166,13 @@ function fill_select_box(){
                     method:"POST",
                     data:{food_group: food_group},
                     success:function(data){
-                        var html = '<option data-tokens = "" selected disabled>Select Food</option>';
+                        var html = '<option value = "" selected disabled>Select Food</option>';
                         html += data;
                         $('#item_sub_category'+sub_category_id).html(html);
                         $('#item_weight'+sub_category_id).val("");
                         $('#unit'+sub_category_id)[0].selectedIndex = 0;
                         $('#item_emissions'+sub_category_id).html("");
                         $('#item_calories'+sub_category_id).html("");
-                        $('.selectpicker').selectpicker('refresh');
                     }
 
                 })
@@ -244,7 +233,6 @@ function fill_select_box(){
             $(function(){
                 $("#calories_button").click(function(){
                     if($('#bmr_calculator_form')[0].checkValidity() === true){
-                        isValid = true;
                         bmr = calculate_calories();
                         nutriArray = calculate_nutrient(bmr);
                         $('#bar_calories').html(0+"&nbsp;kcal");
@@ -254,8 +242,6 @@ function fill_select_box(){
                     }
                 });
             });
-
-
 
             $(function(){
                 $("#return_button").click(function(){
@@ -267,11 +253,7 @@ function fill_select_box(){
 
             $(function(){
                 $("#calculate_button").click(function(){
-                    if(isValid===false){
-                        var text = "Please save your profile in STEP 1 first";
-                        alert(text);
-                    } else if($('#insert_form')[0].checkValidity() === true && isValid===true) {
-                        isValid = true;
+                    if($('#insert_form')[0].checkValidity() === true) {
 
                         $(':required:invalid', '#insert_form').each(function () {
                             var id = $('.tab-pane').find(':required:invalid').closest('.tab-pane').attr('id');
@@ -341,7 +323,6 @@ function fill_select_box(){
                         pb4.setValue(percent);
 
                         show_footprint(sum/1000); //tons
-
                     };
                 });
             });
@@ -349,11 +330,28 @@ function fill_select_box(){
 
         $(function(){
             $("#bmr_button").click(function(){
-                var text = "Sorry, we are currently updating our site.";
-                alert(text);
-
+                $('html,body').animate(
+                    {
+                        scrollTop:$('#check_bmr').offset().top
+                    },
+                    'slow'
+                )
             });
         });
+        /*
+        $(document).ready(function(){
+           $("#food_group").change(function(){
+              var group = $(this).val();
+              $.ajax({
+                 url:"action.php",
+                 method:"POST",
+                 data:{foodGroup: group},
+                  success:function(data){
+                     $("#food_name").html(data);
+                  }
+              });
+           });
+        });*/
 
     </script>
     <script type="text/javascript">
@@ -468,6 +466,11 @@ function fill_select_box(){
             totalNutrient.push(Number(carbSum).toFixed(2), Number(fatSum).toFixed(2), Number(proteinSum).toFixed(2),
                 Number(vitASum).toFixed(2), Number(vitCSum).toFixed(2),Number(vitESum).toFixed(2), Number(calciumSum).toFixed(2));
 
+            /*document.getElementById("total_nutrient").innerHTML = "Carbohydrates " + totalNutrient[0] +"g, " +
+                "Fats " + totalNutrient[1] + "g, " + "Proteins " + totalNutrient[2] + "g, ";
+            document.getElementById("total_nutrient2").innerHTML = "Vitamin A " + totalNutrient[3] +"mcg, " +
+                "Vitamin C " + totalNutrient[4] +"mg, " + "Vitamin E " + totalNutrient[5] + "mg, " +
+                "Calcium " + totalNutrient[6] +"mg"; */
             document.getElementById("total_result").style.display="block";
 
             return totalNutrient;
@@ -485,6 +488,49 @@ function fill_select_box(){
             document.getElementById(id).style.visibility ="hidden";
         }
 
+        /* add ingredient
+        function add(){
+            valid = validateInput();
+            if (valid === true) {
+                addIngredient();
+                insertRecord(ingGroup, ingredient, amount, metric, finalValue, finalCalorie);
+                valid = false;
+                resetForm();
+                selectedRow = null;
+                rowExists = true;
+                checkRow();
+            }
+
+        }*/
+        /*
+        function validateInput() {
+            ingGroup = document.getElementById("food_group").value;
+            ingredient = document.getElementById("food_name").value;
+            amount = parseInt(document.getElementById("amountInput").value);
+            unit = document.getElementById("unit").value;
+
+            // validate and show error message
+            if (ingGroup==""){
+                isValid=false;
+                document.getElementById("groupValidationError").style.visibility ="visible";
+            } else if (ingredient==""){
+                isValid=false;
+                document.getElementById("ingredientValidationError").style.visibility ="visible";
+            } else if ((!(amount>0)) || unit=="") {
+                isValid=false;
+                document.getElementById("amountValidationError").style.visibility ="visible";
+            } else  {
+                isValid = true;
+                if (document.getElementById("groupValidationError").style.visibility === "visible")
+                    document.getElementById("groupValidationError").style.visibility ="hidden";
+                else if (document.getElementById("ingredientValidationError").style.visibility === "visible")
+                    document.getElementById("ingredientValidationError").style.visibility ="hidden";
+                else if (document.getElementById("amountValidationError").style.visibility === "visible")
+                    document.getElementById("amountValidationError").style.visibility ="hidden";
+            }
+            return isValid;
+        }*/
+
         function checkRow () {
             if (rowExists)
             {
@@ -499,6 +545,7 @@ function fill_select_box(){
                 imgExists = false;
             }
         }
+
 
         function calculate_calories() {
             //valid2 = validateInput2();
@@ -530,6 +577,8 @@ function fill_select_box(){
             document.getElementById("bar_bmr").innerHTML = bmr + "&nbsp;kcal";
             return bmr;
         }
+
+        //}
 
         function calculate_nutrient(bmr_value) {
             var tempArray;
@@ -674,6 +723,154 @@ function fill_select_box(){
             }
         }
 
+        /*
+        function validateInput2() {
+            male = document.getElementById("male").value;
+            female = document.getElementById("female").value;
+            height = parseInt(document.getElementById("height").value);
+            weight = parseInt(document.getElementById("weight").value);
+            age = parseInt(document.getElementById("age").value);
+            activity = document.getElementById("activity").value;
+
+            // validate and show error message
+            if (!(document.getElementById('male').checked || document.getElementById('female').checked)){
+                isValid2=false;
+                document.getElementById("genderValidationError").style.visibility ="visible";
+            } else if (!(height > 0)){
+                isValid2=false;
+                document.getElementById("heightValidationError").style.visibility ="visible";
+            } else if (!(weight > 0)) {
+                isValid2=false;
+                document.getElementById("weightValidationError").style.visibility ="visible";
+            } else if (!(age > 0)) {
+                isValid2=false;
+                document.getElementById("ageValidationError").style.visibility ="visible";
+            } else if (activity=="") {
+                isValid2=false;
+                document.getElementById("activityValidationError").style.visibility ="visible";
+            } else  {
+                isValid2 = true;
+                if (document.getElementById("genderValidationError").style.visibility === "visible")
+                    document.getElementById("genderValidationError").style.visibility ="hidden";
+                else if (document.getElementById("heightValidationError").style.visibility === "visible")
+                    document.getElementById("heightValidationError").style.visibility ="hidden";
+                else if (document.getElementById("weightValidationError").style.visibility === "visible")
+                    document.getElementById("weightValidationError").style.visibility ="hidden";
+                else if (document.getElementById("ageValidationError").style.visibility === "visible")
+                    document.getElementById("ageValidationError").style.visibility ="hidden";
+                else if (document.getElementById("activityValidationError").style.visibility === "visible")
+                    document.getElementById("activityValidationError").style.visibility ="hidden";
+            }
+            return isValid2;
+        }
+
+        // validate user input for Amount
+        function isInputNumber(evt){
+            onSelected("amountValidationError");
+            var ch = String.fromCharCode(evt.which);
+            if(!(/[0-9]/.test(ch))) {
+                evt.preventDefault();
+            }
+        }
+
+        function save(){
+            valid = validateInput();
+            if (valid === true) {
+                addIngredient();
+                selectedRow.cells[0].innerHTML = ingGroup;
+                selectedRow.cells[1].innerHTML = ingredient;
+                selectedRow.cells[2].innerHTML = amount + metric;
+                selectedRow.cells[3].innerHTML = finalValue;
+                selectedRow.cells[4].innerHTML = finalCalorie;
+                valid = false;
+                resetForm();
+                selectedRow = null;
+                document.getElementById("save_button").style.visibility = "hidden";
+            }
+        }*/
+
+        /*
+        function insertRecord(grp,ing,amt,met,val,cal){
+            // get the table by id, create a new rows and cell and set values into cell
+            var table = document.getElementById("table").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.length);
+            cell1 = newRow.insertCell(0);
+            cell1.innerHTML = grp; //ingredient
+            cell2 = newRow.insertCell(1);
+            cell2.innerHTML = ing; //ingredient
+            cell3 = newRow.insertCell(2);
+            cell3.innerHTML = amt + met; //amount
+            cell4 = newRow.insertCell(3);
+            cell4.innerHTML = val; //value
+            cell5 = newRow.insertCell(4);
+            cell5.innerHTML = cal; //calories
+            cell6 = newRow.insertCell(5);
+            cell6.innerHTML = '<a onClick="onEdit(this)"><i class="fa fa-pencil fa-lg"></i></a>&nbsp;&nbsp;&nbsp;' +
+                '<a onClick="onDelete(this)"><i class="fa fa-trash fa-lg"></i></a>';
+        }
+
+        // when Edit is clicked on
+        function onEdit(td) {
+            appear=true;
+            show_hide();
+            selectedRow = td.parentElement.parentElement; //return corresponding row
+
+            document.getElementById("food_group").value = selectedRow.cells[0].innerHTML;
+            // force an onchange event
+            $("#food_group").trigger("change");
+
+
+            document.getElementById("food_name").value = selectedRow.cells[1].innerHTML;
+            //document.getElementById("food_name").setAttribute('value',selectedRow.cells[1].innerHTML);
+
+            var cellAmount = selectedRow.cells[2].innerHTML;
+            var returnAmount = "";
+            var returnUnit = "";
+            for (var i = 0; i < cellAmount.length; i++){
+                if (cellAmount.charAt(i) != "k" && cellAmount.charAt(i) != "g") {
+                    returnAmount += cellAmount.charAt(i);
+                }
+                else {
+                    if (cellAmount.charAt(i) == "k") {
+                        returnUnit = "kg";
+                        break;
+                    } else {
+                        returnUnit="g";
+                        break;
+                    }
+                }
+            }
+            document.getElementById("amountInput").value = returnAmount;
+            document.getElementById("unit").value = returnUnit;
+        }
+
+        // delete row
+        function onDelete(td){
+            row = td.parentElement.parentElement;
+            document.getElementById("table").deleteRow(row.rowIndex);
+            resetForm();
+            var x = document.getElementById("table").rows.length;
+            if (x < 2) {
+                rowExists = false;
+            }
+            checkRow();
+        }
+        */
+        /*
+        function show_hide() {
+            if (appear === true){
+                document.getElementById("save_button").style.visibility ="visible";
+            }
+        }
+
+        // reset ingredient form
+        function resetForm() {
+            document.getElementById("food_group").value = "";
+            document.getElementById("food_name").value = "";
+            document.getElementById("amountInput").value = "";
+            document.getElementById("unit").value = "";
+            selectedRow = null;
+        }*/
     </script>
     <noscript>
         <link rel="stylesheet" href="css/skel.css" />
@@ -699,7 +896,7 @@ function fill_select_box(){
         <nav id="nav">
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
+                <li><a href="carbon_footprint.php">Carbon Footprint</a></li>
                 <li><a href="meal_plan.php" class="active-page">Meal Planning</a></li>
                 <li><a href="facts.html" >Facts</a></li>
                 <li><a href="about_us.html">About Us</a></li>
@@ -818,7 +1015,153 @@ function fill_select_box(){
         </nav>
 
     </div>
+    <!--
+    <div class="container">
+        <p class="align-left"></p>
+        <div class="row">
+            <div class="7u">
 
+                <div id="form-group2" class="form-group2">
+                    <p class="bmr_form">GENDER</p>
+                    <input type="radio" id="male" name="gender" value="male" onchange=onSelected("genderValidationError")>
+                    <label class="first_label" for="male">Male</label>
+                    <input type="radio" id="female" name="gender" value="female" onchange=onSelected("genderValidationError")>
+                    <label class="second_label" for="female">Female</label>
+                    <div class="validation-error" style="visibility:hidden;" id="genderValidationError">Please select your gender</div>
+
+                    <p class="bmr_form">HEIGHT</p>
+                    <input class="input_height" type="text" id="height" name="height" maxlength="3" pattern="\d{3}" placeholder="cm" onkeypress="isInputNumber(event)"
+                           onchange=onSelected("heightValidationError")>
+                    <div class="tooltip"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                        <span class="tooltiptext">Round to the nearest integer</span>
+                    </div>
+                    <div class="validation-error" style="visibility:hidden;" id="heightValidationError">Please enter between 1 and 999</div>
+
+                    <p class="bmr_form">WEIGHT</p>
+                    <input class="input_weight" type="text" id="weight" name="weight" maxlength="3" pattern="\d{3}" placeholder="kg" onkeypress="isInputNumber(event)"
+                           onchange=onSelected("weightValidationError")>
+                    <div class="tooltip"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                        <span class="tooltiptext">Round to the nearest integer</span>
+                    </div>
+                    <div class="validation-error" style="visibility:hidden;" id="weightValidationError">Please enter between 1 and 999</div>
+
+                    <p class="bmr_form">AGE</p>
+                    <input class="input_age" id="age" name="age" type="text" maxlength="2" onkeypress="isInputNumber(event);" placeholder="Enter age"
+                           onchange=onSelected("ageValidationError")>
+                    <div class="tooltip"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                        <span class="tooltiptext">Enter between 1 and 99</span>
+                    </div>
+                    <div class="validation-error" style="visibility:hidden;" id="ageValidationError">Please enter between 1 and 99</div>
+
+                    <p class="bmr_form">ACTIVITY</p>
+                    <select class="input_activity" name="activity" id="activity" onchange=onSelected("activityValidationError")>
+                        <option class="input_activity" value="" disabled selected>Select activity level</option>
+                        <option class="input_activity" value="sedentary">Sedentary: little to no exercise</option>
+                        <option class="input_activity" value="light">Light: exercise 1-3 times per week</option>
+                        <option class="input_activity" value="moderate">Moderate: exercise 4-5 times per week</option>
+                        <option class="input_activity" value="veryActive">Very active: intense exercise 6-7 times per week </option>
+                        <option class="input_activity" value="extraActive">Extra active: very intense exercise daily</option>
+                    </select>
+                    <div class="extra_info">Exercise: 15-30 mins of elevated heart rate activity<br>
+                        Intense exercise: 45-120 mins of elevated heart rate activity<br>
+                        Very intense exercise: 2+ hrs of elevated heart rate activity</div>
+                    <div class="validation-error" style="visibility:hidden;" id="activityValidationError">Please select your activity level</div>
+                    <ul class="actions">
+                        <li><a id="calories_button" class="button alt calories" onclick="calculate_calories()">Calculate Calories</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="5u">
+                <div class="result2" id="total_result2" style="display:none;"><br>
+                    <p style="display: inline-block">YOUR DAILY ENERGY REQUIREMENTS :&nbsp;</p><p id="result_bmr" style="display: inline-block"></p><p style="display: inline-block">&nbsp;kcal</p><br>
+                    <p>YOUR DAILY NUTRIENT REQUIREMENTS :&nbsp;</p><p id="result_nutrient"></p><p id="result_nutrient2"></p>
+                </div>
+            </div>
+        </div> -->
+
+
+        <!--
+        <div class="row">
+            <div class="12u">
+                <div id="form-group" class="form-group" style="display: inline-block">
+                    <label for="food_group">FOOD TYPE</label>
+                    <select name ="food_group" id="food_group" onchange=onSelected("groupValidationError")>
+                        <option value="" disabled selected>Select</option>
+                        <?php
+                            while($row=mysqli_fetch_array($result)){
+                        ?>
+                        <option value="<?= $row['food_group']; ?>"><?= $row['food_group']; ?></option>
+                        <?php } ?>
+                    </select>
+                    <div class="validation-error" style="visibility:hidden;" id="groupValidationError">Please select the ingredient group</div>
+
+                    <label for="food_name">FOOD</label>
+                    <select name ="food_name" id="food_name" onchange=onSelected("ingredientValidationError")>
+                        <option value="" disabled selected>Select</option>
+                    </select>
+                    <div class="validation-error" style="visibility:hidden;" id="ingredientValidationError">Please select the ingredient</div>
+
+                    <label for="amount">AMOUNT</label>
+
+                    <input class="input_amount" id="amountInput" placeholder="Weight" type="text"  maxlength="3" onkeypress="isInputNumber(event);">
+                    <div class="tooltip"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                        <span class="tooltiptext">Round to the nearest integer<br>(max. 999)</span>
+                    </div>
+                    <select name ="unit" id="unit" onchange=onSelected("amountValidationError")>
+                        <option value="" disabled selected>Select</option>
+                        <option value="g">g</option>
+                        <option value="kg">kg</option>
+                    </select>
+                    <div class="tooltip"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                        <span class="tooltiptext">g (gram)<br>kg (kilogram)</span>
+                    </div>
+                    <div class="validation-error" style="visibility:hidden;" id="amountValidationError">This field is required</div>
+
+                    <script>
+                        // validate user input for Amount
+                        function isInputNumber(evt){
+                            onSelected("amountValidationError");
+                            var ch = String.fromCharCode(evt.which);
+                            if(!(/[0-9]/.test(ch))) {
+                                evt.preventDefault();
+                            }
+                        }
+                    </script>
+
+                    <ul class="actions">
+                        <li><a id="add_button" class="button alt add" onclick="add()">ADD</a></li>
+                        <li><a id="save_button" class="button alt save" style="visibility:hidden;" onclick="save()">SAVE</a></li>
+                    </ul>
+                </div>
+
+                <table class="list" id="table">
+                    <caption>Recipe Listing</caption>
+                    <tr>
+                        <th>Ingredient Group</th>
+                        <th>Ingredient</th>
+                        <th>Amount</th>
+                        <th>Greenhouse Gases
+                            <div class="tooltip long"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                                <span class="tooltiptext long">Greenhouse gases emitted by producing a kilogram of ingredient</span>
+                            </div>
+                        </th>
+                        <th>Calories
+                            <div class="tooltip long"><i id="info" class="fa fa-info-circle" data-toggle="tooltip"></i>
+                                <span class="tooltiptext long">1 kcal is the energy required to raise the temperature of 1kg of water by 1°C</span>
+                            </div>
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                    <tbody id="myTable">
+                    </tbody>
+                </table>
+                <div class="align-center">
+                    <ul class="actions">
+                        <li><a id="calculate_button" class="button alt calculate" style="visibility:hidden;" onclick="calculate()">CALCULATE</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div> -->
     <div class="container">
         <div>
             <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>

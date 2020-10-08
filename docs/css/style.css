@@ -1467,7 +1467,7 @@
 		}
 
 		#navBar.open{
-			transform: translateX(0);;
+			transform: translateX(0);
 		}
 
 		#hamburgerBtn {
@@ -1478,4 +1478,27 @@
 			border: 1px solid black;
 		}
 
+		.table-responsive {
+			min-height: 200px;
+		}
+
+	}
+
+	.nav-tabs > li > a
+	{
+		/* adjust padding for height*/
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+
+	.table-responsive {
+		min-height:500px;
+	}
+
+	.selectpicker {
+		color: #555f66;
+		font-family: "Roboto", Helvetica, sans-serif;
+		font-size: 14pt;
+		font-weight: 300;
 	}

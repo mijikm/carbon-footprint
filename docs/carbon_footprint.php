@@ -8,14 +8,51 @@
         return $connection;
     };
     $db = db_connect();
-    $distinctSet = $sql="SELECT DISTINCT(food_name) FROM combined_data_removed ORDER BY food_name ASC"; //"SELECT Distinct(Food_product) FROM Food_emission ORDER BY Food_product ASC";
-    $distinctQuery = mysqli_query($db,$distinctSet);
-    $distinctArr = array();
-    foreach ($distinctQuery as $row) {
-        $distinctArr[] = $row;
+    $distinctFruits= $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group = 'Fruits' ORDER BY food_name ASC";
+    $fruitsQuery = mysqli_query($db,$distinctFruits);
+    $fruitsArr = array();
+    foreach ($fruitsQuery as $row) {
+        $fruitsArr[] = $row;
     }
 
-    //query to get data from the table "combined_data"
+    $distinctDairy= $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group = 'Dairy and Eggs' ORDER BY food_name ASC";
+    $dairyQuery = mysqli_query($db,$distinctDairy);
+    $dairyArr = array();
+    foreach ($dairyQuery as $row) {
+        $dairyArr[] = $row;
+    }
+
+    $breakfastOther = $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group != 'Fruits' && food_group != 'Dairy and Eggs' ORDER BY food_name ASC";
+    $breakfastQuery = mysqli_query($db,$breakfastOther);
+    $breakfastArr = array();
+    foreach ($breakfastQuery as $row) {
+        $breakfastArr[] = $row;
+    }
+
+    $distinctVeges= $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group = 'Vegetables' ORDER BY food_name ASC";
+    $vegeQuery = mysqli_query($db,$distinctVeges);
+    $vegeArr = array();
+    foreach ($vegeQuery as $row) {
+        $vegeArr[] = $row;
+    }
+
+    $distinctMeat= $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group = 'Meats' ORDER BY food_name ASC";
+    $meatQuery = mysqli_query($db,$distinctMeat);
+    $meatArr = array();
+    foreach ($meatQuery as $row) {
+        $meatArr[] = $row;
+    }
+
+    $distinctOther= $sql="SELECT DISTINCT(food_name) FROM combined_data_removed WHERE food_group != 'Vegetables' && food_group != 'Meats' ORDER BY food_name ASC";
+    $otherQuery = mysqli_query($db,$distinctOther);
+    $otherArr = array();
+    foreach ($otherQuery as $row) {
+        $otherArr[] = $row;
+    }
+
+
+
+//query to get data from the table "combined_data"
     $totalSet = "SELECT * FROM combined_data_removed ORDER BY food_group ASC";
     //execute query
     $totalQuery = mysqli_query($db, $totalSet);
@@ -27,7 +64,6 @@
     }
 
     //free memory associated with result
-    $distinctQuery -> close();
     $totalQuery -> close();
     //close connection
     $db -> close();
@@ -42,7 +78,7 @@
 <html>
 	<head>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-		<title>Carbon Footprint - Trailblazers</title>
+		<title>What's Your Footprint? - Trailblazers</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <!-- Slideshow -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -50,18 +86,21 @@
 		<meta name="keywords" content="" />
 		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
 		<script src="js/jquery.min.js"></script>
-        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-        <script src=https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
-
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
         <script src="js/skel.min.js"></script>
 		<script src="js/skel-layers.min.js"></script>
 		<script src="js/init.js"></script>
         <script src="js/Chart.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
         <script type ="text/javascript">
             $(document).ready(function(){
-                $(".chosen").chosen();
+                $('.selectpicker').selectpicker({
+                    style: 'btn-default',
+                    size: false,
+                    width: 'fit'
+                });
             });
         </script>
         <script type ="text/javascript">
@@ -261,7 +300,7 @@
 				<nav id="nav">
 					<ul>
 						<li><a href="index.html">Home</a></li>
-						<li><a href="carbon_footprint.php" class="active-page">Carbon Footprint</a></li>
+						<li><a href="carbon_footprint.php" class="active-page">What's Your Footprint?</a></li>
 						<li><a href="meal_plan.php">Meal Planning</a></li>
                         <li><a href="facts.html" >Facts</a></li>
                         <li><a href="about_us.html">About Us</a></li>
@@ -271,15 +310,15 @@
 
             <div class="breadcrumb container">
                 <a href="index.html">Home</a>&nbsp; >&nbsp;
-                <span>Carbon Footprint</span>
+                <span>What's Your Footprint?</span>
             </div>
         <!-- Banner -->
         <div class="container">
             <div id="mealBanner2">
                 <br><br><br><br>
                 <header class="major">
-                    <h3 style="color:#ffffff; font-weight: bold;">Carbon Footprint</h3>
-                    <p style="color: #ffffff">Where do emissions from food come from?</p>
+                    <h3 style="color:#ffffff; font-weight: bold;">What's Your Footprint?</h3>
+                    <p style="color: #ffffff">Find out your current carbon footprint</p>
                 </header>
             </div>
         </div>
@@ -291,92 +330,95 @@
                     <div class="6u">
                         <p>What you eat is important to your carbon footprint. Carbon footprint is the quantity of greenhouse gas in carbon dioxide equivalent (CO2e) which is
                             generated across the supply chain of the product. <br><br>
-                            Find out the carbon footprint of your food by entering what you eat for a day.
+                            Let's find out the carbon footprint based on your choice by entering what you eat for a day.
                             <!--* Negative value can be observed when the carbon dioxide absorbed by the plant’s photosynthesis is more than that released by its respiration.-->
                         </p>
+                        <form method="post" id="multiple_select_form">
+
+                        </form>
                             <h5 class="selectMenu">Breakfast</h5>
-                            <select class="chosen" id="food_name1">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name1">
+                                <option data-tokens="">Select Fruits</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($fruitsArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
-                                }
-                                ?>
-                                </select>
-                            <select class="chosen" id="food_name2">
-                                <option value="" disabled selected>Select</option>
-                                <?php
-                                foreach($distinctArr as $row) {
-                                    $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
-                            <select class="chosen" id="food_name3">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name2">
+                                <option data-tokens="" disabled selected>Select Dairy</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($dairyArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
+                                }
+                                ?>
+                            </select>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name3">
+                                <option data-tokens="" disabled selected>Select Other</option>
+                                <?php
+                                foreach($breakfastArr as $row) {
+                                    $food_name = $row['food_name'];
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
                             <br><br>
                             <h5 class="selectMenu">Lunch</h5>
-                            <select class="chosen" id="food_name4">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name4">
+                                <option data-tokens="" disabled selected>Select Vegetables</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($vegeArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
-                            <select class="chosen" id="food_name5">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name5">
+                                <option data-tokens="" disabled selected>Select Meats</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($meatArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
-                            <select class="chosen" id="food_name6">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name6">
+                                <option data-tokens="" disabled selected>Select Other</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($otherArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
                             <br><br>
                             <h5 class="selectMenu">Dinner</h5>
-                            <select class="chosen" id="food_name7">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name7">
+                                <option data-tokens="" disabled selected>Select Vegetables</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($vegeArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
-                            <select class="chosen" id="food_name8">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name8">
+                                <option data-tokens=""  disabled selected>Select Meats</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($meatArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
-                            <select class="chosen" id="food_name9">
-                                <option value="" disabled selected>Select</option>
+                            <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name9">
+                                <option data-tokens=""  disabled selected>Select Other</option>
                                 <?php
-                                foreach($distinctArr as $row) {
+                                foreach($otherArr as $row) {
                                     $food_name = $row['food_name'];
-                                    echo "<option value='$food_name'>$food_name</option>";
+                                    echo "<option data-tokens='$food_name'>$food_name</option>";
                                 }
                                 ?>
                             </select>
@@ -570,7 +612,6 @@
                         }
 
                     </script> -->
-
 
 		<!-- Footer -->
 			<footer id="footer">
