@@ -10,7 +10,7 @@ The purpose of this project is to improve Australian residents' awareness of eat
 
 
 ### Design & Implementation
-A full-stack web application using XAMPP stack, this app allows you to check your current carbon footprint produced by food and to build your low carbon foodprint recipes. jQuery, Chart.js, PHP, JavaScript, HTML, and CSS were used in order to create this web application and it was deployed with Azure virtual machines.
+A full-stack web application using XAMPP stack, this app allows you to check your current carbon footprint produced by food and to build your low carbon foodprint recipes. jQuery, Chart.js, PHP, JavaScript, HTML, CSS, and Bootstrap were used in order to create this web application and it was deployed with Azure virtual machines.
 
 
 ### Demo
