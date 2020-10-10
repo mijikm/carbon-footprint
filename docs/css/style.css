@@ -1234,6 +1234,20 @@
 		transform: translate(-50%, -50%);
 	}
 
+	#recipeBanner {
+		background-image: url("../images/recipes.png");
+		width:auto;
+		max-height: 200px;
+		min-height: 150px;
+		height:auto;
+		background-position: center center;
+		background-repeat: no-repeat;
+		padding: 0 0;
+		text-align: center;
+		position: relative;
+		z-index: -1;
+	}
+
 
 	#mealBanner {
 		background-image: url("../images/meal1.png");
@@ -1277,12 +1291,11 @@
 		z-index: -1;
 	}
 
-
 	.breadcrumb {
 		z-index:99999;
 	}
 
-	#mealBanner:before, #mealBanner2:before, #factsBanner:before {
+	#mealBanner:before, #mealBanner2:before, #factsBanner:before, #recipeBanner:before {
 		content: none;
 		position: absolute;
 		left: 0;
@@ -1294,12 +1307,13 @@
 
 	}
 
-	#mealBanner .inner, #mealBanner2 .inner, #factsBanner .inner {
+
+	#mealBanner .inner, #mealBanner2 .inner, #factsBanner .inner, #recipeBanner .inner {
 		position: relative;
 		z-index: -1;
 	}
 
-	#mealBanner .inner :last-child, #mealBanner2 .inner :last-child, #factsBanner .inner :last-child  {
+	#mealBanner .inner :last-child, #mealBanner2 .inner :last-child, #factsBanner .inner :last-child, #recipeBanner .inner :last-child  {
 		margin-bottom: 0;
 	}
 
@@ -1491,7 +1505,6 @@
 		padding-bottom: 4px;
 	}
 
-
 	.table-responsive {
 		min-height:500px;
 	}
@@ -1501,4 +1514,8 @@
 		font-family: "Roboto", Helvetica, sans-serif;
 		font-size: 14pt;
 		font-weight: 300;
+	}
+
+	input.invalid {
+		border-color: red;
 	}

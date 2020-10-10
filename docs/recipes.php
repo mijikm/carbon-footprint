@@ -61,7 +61,7 @@ function fill_select_box(){
 <html>
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <title>Meal Planning - Trailblazers</title>
+    <title>Recipes - Trailblazers</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
     <!-- jQuery library -->
@@ -143,10 +143,10 @@ function fill_select_box(){
                 var html = '';
 
                 html += '<tr>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="">Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="">Select Food</option></select></td>';
+                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="" selected disabled>Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
+                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="" selected disabled>Select Food</option></select></td>';
                 html += '<td><input name="item_weight" class="form-control item_weight selectpicker" data-sub_category_id="'+count+'" placeholder="Enter" type="number" min="0.01" step="0.01" id="item_weight'+count+'" required></td>';
-                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option data-tokens="">Select g/kg</option>\n' +
+                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option value="" selected disabled>Select g/kg</option>\n' +
                     '                        <option data-tokens="g">g</option>\n' +
                     '                        <option data-tokens="kg">kg</option></select></td>';
                 html += '<td><output class="item_emissions" id="item_emissions'+count+'"></output></td>'
@@ -160,7 +160,7 @@ function fill_select_box(){
 
 
             $(document).on('click','.remove', function(){
-               $(this).closest('tr').remove();
+                $(this).closest('tr').remove();
                 if ( $("#item_table tr").length < 2) {
 
                     $('#total_result').css("display","none");
@@ -191,36 +191,13 @@ function fill_select_box(){
             //validation
             $('#insert_form').on('submit',function(event){
                 event.preventDefault();
-            });
-
-            $('#insert_form_lunch').on('submit',function(event){
-                event.preventDefault();
-            });
-
-            $('#insert_form_dinner').on('submit',function(event){
-                event.preventDefault();
+                //var form_data = $(this).serialize();
+                //$('#item_table').find("tr:gt(0)").remove();
             });
 
             $('#bmr_calculator_form').on('submit',function(event){
                 event.preventDefault();
             });
-
-            var invalidClassName = 'invalid';
-            var inputs = document.querySelectorAll('input, select, textarea');
-            inputs.forEach(function (input) {
-                // Add a css class on submit when the input is invalid.
-                input.addEventListener('invalid', function () {
-                    input.classList.add(invalidClassName)
-                })
-
-                // Remove the class when the input becomes valid.
-                // 'input' will fire each time the user types
-                input.addEventListener('input', function () {
-                    if (input.validity.valid) {
-                        input.classList.remove(invalidClassName)
-                    }
-                })
-            })
 
             $(document).on('change', '.item_sub_category', function(){
                 var food_name = $(this).val();
@@ -296,6 +273,11 @@ function fill_select_box(){
                     } else if($('#insert_form')[0].checkValidity() === true && isValid===true) {
                         isValid = true;
 
+                        $(':required:invalid', '#insert_form').each(function () {
+                            var id = $('.tab-pane').find(':required:invalid').closest('.tab-pane').attr('id');
+
+                            $('.nav a[href="#' + id + '"]').tab('show');
+                        });
 
                         $('#total_result').css("display","block");
                         $('html,body').animate(
@@ -360,9 +342,6 @@ function fill_select_box(){
 
                         show_footprint(sum/1000); //tons
 
-                    }
-                    else {
-                        alert('Please fill in the field')
                     };
                 });
             });
@@ -577,9 +556,9 @@ function fill_select_box(){
             }
 
             document.getElementById("result_nutrient").innerHTML = "Carbohydrates " + nutriArray[6] +"g, " +
-            "Fats " + nutriArray[0] + "g, " + "Proteins " + nutriArray[1] + "g, " + "Vitamin A " + nutriArray[2] +"mcg, " +
-            "Vitamin C " + nutriArray[3] +"mg, " + "Vitamin E " + nutriArray[4] + "mg, " +
-            "Calcium " + nutriArray[5] +"mg";
+                "Fats " + nutriArray[0] + "g, " + "Proteins " + nutriArray[1] + "g, " + "Vitamin A " + nutriArray[2] +"mcg, " +
+                "Vitamin C " + nutriArray[3] +"mg, " + "Vitamin E " + nutriArray[4] + "mg, " +
+                "Calcium " + nutriArray[5] +"mg";
             document.getElementById("bar_carb_bmr").innerHTML = nutriArray[6] + "&nbsp;g";
             document.getElementById("bar_fat_bmr").innerHTML = nutriArray[0] + "&nbsp;g";
             document.getElementById("bar_protein_bmr").innerHTML = nutriArray[1] + "&nbsp;g";
@@ -714,251 +693,265 @@ function fill_select_box(){
     <meta name="theme-color" content="#ffffff">
 </head>
 <body id="top" class="meal_body">
-    <!-- Header -->
-    <header id="header" class="skel-layers-fixed">
-        <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
-        <nav id="nav">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
-                <li><a href="meal_plan.php" class="active-page">Meal Planning</a></li>
-                <li><a href="recipes.php">Recipes</a></li>
-                <li><a href="facts.html" >Facts</a></li>
-                <li><a href="about_us.html">About Us</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="breadcrumb container">
-        <a href="index.html">Home</a>&nbsp; >&nbsp;
-        <span>Meal Planning</span>
+<!-- Header -->
+<header id="header" class="skel-layers-fixed">
+    <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
+    <nav id="nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
+            <li><a href="meal_plan.php">Meal Planning</a></li>
+            <li><a href="recipes.php" class="active-page">Recipes</a></li>
+            <li><a href="facts.html" >Facts</a></li>
+            <li><a href="about_us.html">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="breadcrumb container">
+    <a href="index.html">Home</a>&nbsp; >&nbsp;
+    <span>Recipes</span>
+</div>
+<!-- Banner -->
+<div class="container">
+    <div id="hamburgerBox"></div>
+    <div id="hamburgerBtn">&#9776 </div>
+</div>
+<div class="container">
+    <div id="recipeBanner">
+        <br><br><br><br>
+        <header class="major">
+            <h3 style="color:#ffffff; font-weight: bold;">Recipes</h3>
+            <p style="color: #ffffff">Eat healthy with low carbon footprint meals</p>
+        </header>
     </div>
-    <!-- Banner -->
-    <div class="container">
-        <div id="hamburgerBox"></div>
-        <div id="hamburgerBtn">&#9776 </div>
-    </div>
-    <div class="container">
-        <div id="mealBanner">
-            <br><br><br><br>
-            <header class="major">
-                <h3 style="color:#ffffff; font-weight: bold;">Meal Planning</h3>
-                <p style="color: #ffffff">Build your own meals based on daily requirements</p>
-            </header>
-        </div>
-    </div>
-    <br>
-    <div class="container">
-        <nav id="navBar">
-            <div class="nav-brand">
-                <form method="post" id="bmr_calculator_form" style="display:block;">
-                    <p>STEP 1.<br>Check your daily energy requirements</p>
-                    <div id="form-group2" class="form-group2">
-                        <p class="bmr_form">Gender</p><br>
-                        <div class="first_label" style="display: inline-block;">
-                            <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
-                            <label for="male" style="color:#ffffff;">Male</label>
-                            <input class="auto_save" type="radio" id="female" name="gender" />
-                            <label for="female" style="color:#ffffff;">Female</label>
-                        </div><br>
-                        <p class="bmr_form">Height</p>
-                        <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
+</div>
+<br>
+<div class="container">
+    <nav id="navBar">
+        <div class="nav-brand">
+            <form method="post" id="bmr_calculator_form" style="display:block;">
+                <p>STEP 1.<br>Check your daily energy requirements</p>
+                <div id="form-group2" class="form-group2">
+                    <p class="bmr_form">Gender</p><br>
+                    <div class="first_label" style="display: inline-block;">
+                        <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
+                        <label for="male" style="color:#ffffff;">Male</label>
+                        <input class="auto_save" type="radio" id="female" name="gender" />
+                        <label for="female" style="color:#ffffff;">Female</label>
+                    </div><br>
+                    <p class="bmr_form">Height</p>
+                    <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
 
-                        <p class="bmr_form">Weight</p>
-                        <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
-                        <br>
-
-                        <p class="bmr_form">Age</p>
-                        <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
-                        <br>
-
-                        <p class="bmr_form">Activity</p>
-                        <select class="input_activity auto_save" name="activity" id="activity" required>
-                            <option class="input_activity auto_save" value="">Select activity level</option>
-                            <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
-                            <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
-                            <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
-                            <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
-                            <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
-                        </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
-                                       title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
-                        <!--class="btn btn-primary"-->
-                        <br><br>
-                        <input type="submit" name="submit" class="button alt" style="background-color: #ffffff" id="calories_button" value="SAVE PROFILE" />
-                        <hr class="major" />
-                    </div> <!--div form-group-->
-                </form>
-            </div> <!--div nav-brand-->
-            <div class="result2" id="total_result2" style="display:none;">
-                <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
-                <ul class="actions">
-                    <li><a id="return_button" style="background-color: #ffffff" class="button alt">EDIT PROFILE</a></li>
-                </ul>
-
-                <p id="result_nutrient" style="display: none"></p>
-
-                <div>
-                    <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
-                </div>
-                <div>
-                    <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
-                    <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-energy">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Carb&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
-                    <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-carb">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
-                    <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-fat">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
-                    <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-protein">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-            </div> <!--result2-->
-        </nav>
-    </div> <!--container-->
-
-    <div class="container">
-        <div>
-            <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>
-        </div>
-        <h4 class="align-center">YOUR MEAL PLAN</h4>
-            <ul class="nav nav-tabs" >
-                <li class="active"><a data-toggle="tab" href="#breakfast_tab">BREAKFAST</a></li>
-                <li><a data-toggle="tab" href="#lunch_tab">LUNCH</a></li>
-                <li><a data-toggle="tab" href="#dinner_tab">DINNER</a></li>
-            </ul>
-        <form method="post" id="insert_form">
-            <div class="tab-content" style="margin-top: 10px;">
-                <div id="breakfast_tab" class="tab-pane fade in active">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover" id="item_table">
-                                <thead>
-                                <tr>
-                                    <th>Food Type</th>
-                                    <th>Food</th>
-                                    <th>Weight</th>
-                                    <th>Unit</th>
-                                    <th>Greenhouse Gases</th>
-                                    <th>Calories</th>
-                                    <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                            <span class="glyphicon glyphicon-plus"></span>
-                                        </button></th>
-                                </tr>
-                                </thead>
-                                <tbody id="first_table"></tbody>
-                            </table>
-                        </div> <!-- table-responsive-->
-                </div> <!-- breakfast-->
-                <div id="lunch_tab" class="tab-pane fade">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover" id="item_table_lunch">
-                                <thead>
-                                <tr>
-                                    <th>Food Type</th>
-                                    <th>Food</th>
-                                    <th>Weight</th>
-                                    <th>Unit</th>
-                                    <th>Greenhouse Gases</th>
-                                    <th>Calories</th>
-                                    <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                            <span class="glyphicon glyphicon-plus"></span>
-                                        </button></th>
-                                </tr>
-                                </thead>
-                                <tbody id="lunch_table"></tbody>
-                            </table>
-                        </div> <!-- table-responsive-->
-                </div><!-- lunch -->
-                <div id="dinner_tab" class="tab-pane fade">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover" id="item_table_dinner">
-                                <thead>
-                                <tr>
-                                    <th>Food Type</th>
-                                    <th>Food</th>
-                                    <th>Weight</th>
-                                    <th>Unit</th>
-                                    <th>Greenhouse Gases</th>
-                                    <th>Calories</th>
-                                    <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                            <span class="glyphicon glyphicon-plus"></span>
-                                        </button></th>
-                                </tr>
-                                </thead>
-                                <tbody id="dinner_table"></tbody>
-                            </table>
-                        </div>
-                </div> <!--dinner-->
-                    <p>STEP 3. Click on the CALCULATE FOODPRINT button to find out your carbon footprint</p><br>
-                    <input type="submit" name="submit" class="button alt align-center" id="calculate_button" value="CALCULATE FOOTPRINT" />
-            </div> <!--tab content-->
-        </form><br>
-
-        <div class="row">
-            <div class="12u align-center">
-                <div class="result" id="total_result" style="display:none; padding-top: 60px;" >
+                    <p class="bmr_form">Weight</p>
+                    <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
                     <br>
-                    <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;"> &nbsp;YOUR FOOTPRINT IS&nbsp;</h3>
-                    <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;" id="carbon_footprint"></span></h3><br>
-                    <div id="tree_image" class="tree_image" style="display:none; text-align: center;">
-                        <img id="img_tree" style="display: none; text-align: center" src="images/trees.png" class="image" width="500">
-                        <h3 style="display: inline-block">It takes&nbsp;</h3><h3 style="display: inline-block; font-weight:bold;" id="tree_num"></h3>
-                        <h3 style="display: inline-block">trees to offset your annual footprint</h3><br>
-                        <p style="margin-bottom: 0;">On average, every tree absorbs 0.07 tons of CO2 annually.</p><p style="display: inline-block">Your footprint requires&nbsp;</p><p style="display: inline-block;font-weight:bold;" id="tree_num2"></p><p style="display: inline-block">&nbsp;trees per year.</p>
-                    </div>
-                    <ul class="actions">
-                        <li><a id="bmr_button" class="button alt bmr">Check out our recipes </a></li>
-                    </ul>
-                    <h4 style="display: none" class="meal_planning">CALORIES OF YOUR MEAL PLAN :&nbsp;</h4><h4 style="display: none" id="total_calories"></h4><br>
-                    <h4 style="display: none" class="meal_planning">TOTAL AMOUNT OF NUTRIENT :&nbsp;</h4><br><h4 style="display: none" id="total_nutrient"></h4><h4 style="display: none" id="total_nutrient2"></h4><br>
 
+                    <p class="bmr_form">Age</p>
+                    <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
+                    <br>
 
-                    <div id="footprint_image" style="display:none; text-align: center;"><!--http://www.globalstewards.org/reduce-carbon-footprint.htm-->
-                        <img id="img_verylow" style="display: none; text-align: center" src="images/verylow.png" class="image" width="400">
-                        <img id="img_low" style="display: none; text-align: center" src="images/low.png" class="image" width="400">
-                        <img id="img_average" style="display: none; text-align: center" src="images/average.png" class="image" width="400">
-                        <img id="img_littlehigh" style="display: none; text-align: center" src="images/littlehigh.png" class="image" width="400">
-                        <img id="img_high" style="display: none; text-align: center" src="images/high.png" class="image" width="400">
-                        <img id="img_veryhigh" style="display: none; text-align: center" src="images/veryhigh.png" class="image" width="400">
-                        <br>
-                    </div>
-                </div> <!--result-->
+                    <p class="bmr_form">Activity</p>
+                    <select class="input_activity auto_save" name="activity" id="activity" required>
+                        <option class="input_activity auto_save" value="">Select activity level</option>
+                        <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
+                        <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
+                        <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
+                        <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
+                        <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
+                    </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
+                                         title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
+                    <!--class="btn btn-primary"-->
+                    <br><br>
+                    <input type="submit" name="submit" class="button alt" style="background-color: #ffffff" id="calories_button" value="SAVE PROFILE" />
+                    <hr class="major" />
+                </div> <!--div form-group-->
+            </form>
+        </div>
+        <div class="result2" id="total_result2" style="display:none;">
+            <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
+            <ul class="actions">
+                <li><a id="return_button" style="background-color: #ffffff" class="button alt">EDIT PROFILE</a></li>
+            </ul>
+
+            <p id="result_nutrient" style="display: none"></p>
+
+            <div>
+                <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
             </div>
-        </div> <!--row-->
-    </div> <!-- 1st Container -->
+            <div>
+                <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
+                <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-energy">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div>
+                <p style="display: inline-block; margin: 0;">Carb&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
+                <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-carb">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
 
 
-        <!-- Footer -->
-        <footer id="footer">
-            <div class="container">
-                <ul class="copyright">
-                    <li>Copyright &copy; 2020 Trailblazers.</li>
-                    <li>Design: TEMPLATED</li>
-                    <li>Images: Pexels</li>
+            <div>
+                <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
+                <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-fat">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div>
+                <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
+                <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-protein">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+        </div>
+    </nav>
+
+</div>
+
+<div class="container">
+    <div>
+        <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>
+    </div>
+    <h4 class="align-center">YOUR MEAL PLAN</h4>
+    <ul class="nav nav-tabs" >
+        <li class="active"><a data-toggle="tab" href="#breakfast_tab">BREAKFAST</a></li>
+        <li><a data-toggle="tab" href="#lunch_tab">LUNCH</a></li>
+        <li><a data-toggle="tab" href="#dinner_tab">DINNER</a></li>
+    </ul>
+    <div class="tab-content" style="margin-top: 10px;">
+        <div id="breakfast_tab" class="tab-pane fade in active">
+            <form method="post" id="insert_form">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="item_table">
+                        <thead>
+                        <tr>
+                            <th>Food Type</th>
+                            <th>Food</th>
+                            <th>Weight</th>
+                            <th>Unit</th>
+                            <th>Greenhouse Gases</th>
+                            <th>Calories</th>
+                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button></th>
+                        </tr>
+                        </thead>
+                        <tbody id="first_table"></tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <div id="lunch_tab" class="tab-pane fade">
+            <form method="post" id="insert_form_lunch">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="item_table_lunch">
+                        <thead>
+                        <tr>
+                            <th>Food Type</th>
+                            <th>Food</th>
+                            <th>Weight</th>
+                            <th>Unit</th>
+                            <th>Greenhouse Gases</th>
+                            <th>Calories</th>
+                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button></th>
+                        </tr>
+                        </thead>
+                        <tbody id="lunch_table"></tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <div id="dinner_tab" class="tab-pane fade">
+            <form method="post" id="insert_form_dinner">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="item_table_dinner">
+                        <thead>
+                        <tr>
+                            <th>Food Type</th>
+                            <th>Food</th>
+                            <th>Weight</th>
+                            <th>Unit</th>
+                            <th>Greenhouse Gases</th>
+                            <th>Calories</th>
+                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button></th>
+                        </tr>
+                        </thead>
+                        <tbody id="dinner_table"></tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div>
+        <p>STEP 3. Click on the CALCULATE FOODPRINT button to find out your carbon footprint</p><br>
+    </div>
+    <div class="align-center">
+        <input type="submit" name="submit" class="button alt" id="calculate_button" value="CALCULATE FOOTPRINT" />
+    </div><br>
+
+    <div class="row">
+        <div class="12u align-center">
+            <div class="result" id="total_result" style="display:none; padding-top: 60px;" >
+                <br>
+                <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;"> &nbsp;YOUR FOOTPRINT IS&nbsp;</h3>
+                <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;" id="carbon_footprint"></span></h3><br>
+                <div id="tree_image" class="tree_image" style="display:none; text-align: center;">
+                    <img id="img_tree" style="display: none; text-align: center" src="images/trees.png" class="image" width="500">
+                    <h3 style="display: inline-block">It takes&nbsp;</h3><h3 style="display: inline-block; font-weight:bold;" id="tree_num"></h3>
+                    <h3 style="display: inline-block">trees to offset your annual footprint</h3><br>
+                    <p style="margin-bottom: 0;">On average, every tree absorbs 0.07 tons of CO2 annually.</p><p style="display: inline-block">Your footprint requires&nbsp;</p><p style="display: inline-block;font-weight:bold;" id="tree_num2"></p><p style="display: inline-block">&nbsp;trees per year.</p>
+                </div>
+                <ul class="actions">
+                    <li><a id="bmr_button" class="button alt bmr">Check out our recipes </a></li>
                 </ul>
+                <h4 style="display: none" class="meal_planning">CALORIES OF YOUR MEAL PLAN :&nbsp;</h4><h4 style="display: none" id="total_calories"></h4><br>
+                <h4 style="display: none" class="meal_planning">TOTAL AMOUNT OF NUTRIENT :&nbsp;</h4><br><h4 style="display: none" id="total_nutrient"></h4><h4 style="display: none" id="total_nutrient2"></h4><br>
+
+
+                <div id="footprint_image" style="display:none; text-align: center;"><!--http://www.globalstewards.org/reduce-carbon-footprint.htm-->
+                    <img id="img_verylow" style="display: none; text-align: center" src="images/verylow.png" class="image" width="400">
+                    <img id="img_low" style="display: none; text-align: center" src="images/low.png" class="image" width="400">
+                    <img id="img_average" style="display: none; text-align: center" src="images/average.png" class="image" width="400">
+                    <img id="img_littlehigh" style="display: none; text-align: center" src="images/littlehigh.png" class="image" width="400">
+                    <img id="img_high" style="display: none; text-align: center" src="images/high.png" class="image" width="400">
+                    <img id="img_veryhigh" style="display: none; text-align: center" src="images/veryhigh.png" class="image" width="400">
+                    <br>
+                </div>
             </div>
-        </footer>
-    </body>
+        </div>
+    </div>
+</div>
+
+<br>
+
+
+</div> 	<!-- 1st Container -->
+
+<!-- Footer -->
+<footer id="footer">
+    <div class="container">
+        <ul class="copyright">
+            <li>Copyright &copy; 2020 Trailblazers.</li>
+            <li>Design: TEMPLATED</li>
+            <li>Images: Pexels</li>
+        </ul>
+    </div>
+</footer>
+</body>
 </html>
