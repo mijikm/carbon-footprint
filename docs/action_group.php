@@ -4,7 +4,7 @@ define("DB_user","root");
 define("DB_password",""); //toor33
 define("DB_name","phpmyadmin");
 
-$connect = new PDO("mysql:host=localhost; dbname=phpmyadmin;", "root", "");//toor33
+$connect = new PDO("mysql:host=localhost; dbname=phpmyadmin;", DB_user, DB_password);//toor33
 
 function fill_select_box($connect, $food_group)
 {

@@ -101,6 +101,17 @@
                     size: false,
                     width: 'fit'
                 });
+
+                $("#findout").click(function(){
+
+                $('html,body').animate(
+                    {
+                        scrollTop:$('#chartRow').offset().top
+                    },
+                    'slow'
+                )
+                });
+
             });
         </script>
         <script type ="text/javascript">
@@ -326,10 +337,10 @@
 
 		<!-- Main -->
 			<div id="main" class="wrapper style1">
-                <div class="container">
+                <div class="container align-center">
                 <div class="row">
-                    <div class="6u">
-                        <p>What you eat is important to your carbon footprint. Carbon footprint is the quantity of greenhouse gas in carbon dioxide equivalent (CO2e) which is
+                    <div class="12u">
+                        <p>What you eat is important to your carbon footprint.<br>Carbon footprint is the quantity of greenhouse gas in carbon dioxide equivalent (CO2e)<br>which is
                             generated across the supply chain of the product. <br><br>
                             Let's find out the carbon footprint based on your choice by entering what you eat for a day.
                             <!--* Negative value can be observed when the carbon dioxide absorbed by the plant’s photosynthesis is more than that released by its respiration.-->
@@ -425,23 +436,23 @@
                             </select>
                         <br><br><br>
                         <ul class="actions">
-                            <li><a class="button alt" onclick="validateInput()">Find out your footprint</a></li>
+                            <li><a class="button alt" onclick="validateInput()" id="findout">Find out your footprint</a></li>
                         </ul>
-
-                    </div> <!-- first 6u -->
-                     <div class="6u">
-                        <div class="row">
-                            <canvas id="myChart" width="60" height="40"></canvas>
-                            <div id="petrol" style="display: none;"><br>
-                                <p style="display: inline-block">Your daily carbon footprint is &nbsp;</p><p id="result_petrol" style="display: inline-block; font-weight:bold;"></p>
-                                <p style="display: inline-block">This is the equivalent of driving a medium petrol car&nbsp;</p><p id="result_car" style="display: inline-block; font-weight:bold;"></p>
-
-                            </div>
-                        </div>
-                    </div> <!-- 2nd 6u -->
+                    </div> <!-- 12u -->
                 </div> <!-- 1st row -->
 
                 <hr class="major" />
+                <div class="row" id="chartRow">
+                    <div class="6u">
+                        <canvas id="myChart" width="60" height="40"></canvas>
+                    </div>
+                    <div class="6u">
+                        <div id="petrol" style="display: none;"><br>
+                            <img src="images/foot_icon.png" width="50"/></a><p style="display: inline-block">Your daily carbon footprint is &nbsp;</p><p id="result_petrol" style="display: inline-block; font-weight:bold;"></p><br>
+                            <img src="images/car_icon.png" width="60"/></a><p style="display: inline-block">This is the equivalent of driving a medium petrol car&nbsp;</p><p id="result_car" style="display: inline-block; font-weight:bold;"></p>
+                        </div>
+                    </div>
+                </div><br><br><br> <!--row-->
                     <div class ="12u align-center carbonBanner">
                         <a href="meal_plan.php" class="image effect"><img src="images/carbon_banner.png" width="500" alt="Meal Planning" /></a>
                         <div class="centered">
@@ -449,7 +460,6 @@
                         </div>
                     </div>
                 </div> 	<!-- 1st Container -->
-
             </div> 	<!-- main wrapper -->
 
 		<!-- Footer -->

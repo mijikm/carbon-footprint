@@ -77,11 +77,66 @@ function fill_select_box(){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
     <script type="text/javascript">
-
         $(document).ready(function(){
+            var count = 0;
+            var bmr;
+            var nutriArray;
+            var isValid = false;
+
+            //use localStorage - openDiv(), save(), load() - for sidebar profile
+            function openDiv() {
+                var profile = document.getElementById("total_result2");
+                var stepOne = document.getElementById("bmr_calculator_form")
+                if(profile.style.display === "none"){
+                    stepOne.style.display = "none";
+                    profile.style.display = "block";
+                    document.getElementById("result_bmr").innerHTML = localStorage.getItem('resultBmr');
+                    document.getElementById("bar_bmr").innerHTML = localStorage.getItem('barBmr');
+                    document.getElementById("bar_calories").innerHTML = localStorage.getItem('barCalories');
+                    document.getElementById("bar_carb_bmr").innerHTML = localStorage.getItem('barCarbBmr');
+                    document.getElementById("bar_fat_bmr").innerHTML = localStorage.getItem('barFatBmr');
+                    document.getElementById("bar_protein_bmr").innerHTML = localStorage.getItem('barProteinBmr');
+                    document.getElementById("bar_carb").innerHTML = localStorage.getItem('barCarb');
+                    document.getElementById("bar_fat").innerHTML = localStorage.getItem('barFat');
+                    document.getElementById("bar_protein").innerHTML = localStorage.getItem('barProtein');
+                    bmr = localStorage.getItem('bmr');
+                    nutriArray = JSON.parse(localStorage.getItem('nutriArray'));
+                    console.log(nutriArray)
+                }
+            }
+
+            function save() {
+                openDiv();
+                var saveDiv = document.getElementById("total_result2");
+                if (saveDiv.style.display === "block") {
+                    localStorage.setItem("isVisible", true);
+                    localStorage.resultBmr = document.getElementById("result_bmr").innerHTML;
+                    localStorage.barBmr = document.getElementById("bar_bmr").innerHTML;
+                    localStorage.barCalories = document.getElementById("bar_calories").innerHTML;
+                    localStorage.barCarbBmr = document.getElementById("bar_carb_bmr").innerHTML;
+                    localStorage.barFatBmr = document.getElementById("bar_fat_bmr").innerHTML;
+                    localStorage.barProteinBmr = document.getElementById("bar_protein_bmr").innerHTML;
+                    localStorage.barCarb = document.getElementById("bar_carb").innerHTML;
+                    localStorage.barFat = document.getElementById("bar_fat").innerHTML;
+                    localStorage.barProtein = document.getElementById("bar_protein").innerHTML;
+                    localStorage.setItem("bmr", bmr);
+                    localStorage.setItem("nutriArray", JSON.stringify(nutriArray));
+                }
+            }
+
+            function load() {
+                var isVisible = localStorage.getItem("isVisible");
+                if (isVisible == "true") {
+                    openDiv();
+                }
+            }
+
+            load();
+
             $(function(){
                 $('.auto_save').savy('load');
             });
+
             $('.selectpicker').selectpicker({
                 style: 'btn-default',
                 size: false,
@@ -125,10 +180,6 @@ function fill_select_box(){
             const pb3 = new ProgressBar(document.querySelector('.progress-bar-fat'), 0);
             const pb4 = new ProgressBar(document.querySelector('.progress-bar-protein'), 0);
 
-            var count = 0;
-            var bmr;
-            var nutriArray;
-            var isValid = false;
 
             $(document).on('click', '.add', function(){
                 var tab_id = $('.tab-content .active').attr('id');
@@ -274,10 +325,11 @@ function fill_select_box(){
                         $('#bar_carb').html(0+"&nbsp;g");
                         $('#bar_fat').html(0+"&nbsp;g");
                         $('#bar_protein').html(0+"&nbsp;g");
+                        save();
+
                     }
                 });
             });
-
 
 
             $(function(){
@@ -290,12 +342,8 @@ function fill_select_box(){
 
             $(function(){
                 $("#calculate_button").click(function(){
-                    if(isValid===false){
-                        var text = "Please save your profile in STEP 1 first";
-                        alert(text);
-                    } else if($('#insert_form')[0].checkValidity() === true && isValid===true) {
+                    if($('#insert_form')[0].checkValidity() === true) {
                         isValid = true;
-
 
                         $('#total_result').css("display","block");
                         $('html,body').animate(
@@ -345,13 +393,16 @@ function fill_select_box(){
                             }
 
                         });
+
                         var totalNutrient = checkNutrientData(nutrientDict);
                         $('#bar_carb').html(totalNutrient[0] + "&nbsp;g");
                         var percent = Number(totalNutrient[0] / (nutriArray[6]) * 100).toFixed(0);
+                        console.log("totalNutrient Carb" + totalNutrient[0], "nutriArray6" + nutriArray[6]);
                         pb2.setValue(percent);
 
                         $('#bar_fat').html(totalNutrient[1] + "&nbsp;g");
                         var percent = Number(totalNutrient[1] / (nutriArray[0]) * 100).toFixed(0);
+                        console.log("totalNutrient Fat" + totalNutrient[1], "nutriArray0" + nutriArray[0]);
                         pb3.setValue(percent);
 
                         $('#bar_protein').html(totalNutrient[2] + "&nbsp;g");
@@ -368,13 +419,6 @@ function fill_select_box(){
             });
         });
 
-        $(function(){
-            $("#bmr_button").click(function(){
-                var text = "Sorry, we are currently updating our site.";
-                alert(text);
-
-            });
-        });
 
     </script>
     <script type="text/javascript">
@@ -499,7 +543,6 @@ function fill_select_box(){
             document.getElementById("tree_image").style.display="block";
             document.getElementById("img_tree").style.display="block";
             imgExists = true;
-
         }
 
         function onSelected(id){
@@ -522,8 +565,6 @@ function fill_select_box(){
         }
 
         function calculate_calories() {
-            //valid2 = validateInput2();
-            //if(valid2==true) {
             var gender = "";
             var height = parseFloat(document.getElementById("height").value);
             var weight = parseFloat(document.getElementById("weight").value);
@@ -751,7 +792,7 @@ function fill_select_box(){
         <nav id="navBar">
             <div class="nav-brand">
                 <form method="post" id="bmr_calculator_form" style="display:block;">
-                    <p>STEP 1.<br>Check your daily energy requirements</p>
+                    <p style="font-weight: 500;">STEP 1.<br>Check your daily energy requirements</p>
                     <div id="form-group2" class="form-group2">
                         <p class="bmr_form">Gender</p><br>
                         <div class="first_label" style="display: inline-block;">
@@ -841,7 +882,9 @@ function fill_select_box(){
 
     <div class="container">
         <div>
-            <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>
+            <p style="font-weight: 500;">STEP 2. Build your meal plan by clicking <button class="btn btn-success btn-xs add" disabled>
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button> button for each meal tab</p><br>
         </div>
         <h4 class="align-center">YOUR MEAL PLAN</h4>
             <ul class="nav nav-tabs" >
@@ -911,7 +954,7 @@ function fill_select_box(){
                             </table>
                         </div>
                 </div> <!--dinner-->
-                    <p>STEP 3. Click on the CALCULATE FOODPRINT button to find out your carbon footprint</p><br>
+                    <p style="font-weight: 500;">STEP 3. Click on the CALCULATE FOODPRINT button to find out your carbon footprint</p><br>
                     <input type="submit" name="submit" class="button alt align-center" id="calculate_button" value="CALCULATE FOOTPRINT" />
             </div> <!--tab content-->
         </form><br>
@@ -929,7 +972,7 @@ function fill_select_box(){
                         <p style="margin-bottom: 0;">On average, every tree absorbs 0.07 tons of CO2 annually.</p><p style="display: inline-block">Your footprint requires&nbsp;</p><p style="display: inline-block;font-weight:bold;" id="tree_num2"></p><p style="display: inline-block">&nbsp;trees per year.</p>
                     </div>
                     <ul class="actions">
-                        <li><a id="bmr_button" class="button alt bmr">Check out our recipes </a></li>
+                        <li><a href="recipes.php" id="bmr_button" class="button alt bmr">Check out our recipes </a></li>
                     </ul>
                     <h4 style="display: none" class="meal_planning">CALORIES OF YOUR MEAL PLAN :&nbsp;</h4><h4 style="display: none" id="total_calories"></h4><br>
                     <h4 style="display: none" class="meal_planning">TOTAL AMOUNT OF NUTRIENT :&nbsp;</h4><br><h4 style="display: none" id="total_nutrient"></h4><h4 style="display: none" id="total_nutrient2"></h4><br>

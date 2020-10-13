@@ -77,11 +77,75 @@ function fill_select_box(){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
     <script type="text/javascript">
+        // searchFucntion() is called when type in Search box
+        function searchFunction() {
+            var input, filter, ul, li, a, i;
+            input = document.getElementById('myinput');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById('recipe_wrapper');
+            li = ul.getElementsByTagName('li');
+
+            for(i=0; i<li.length;i++){
+                a= li[i].getElementsByTagName('a')[0];
+                if(a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display="";
+                }
+                else{
+                    li[i].style.display='none';
+                }
+            }
+        }
+
+        //use localStorage - openDiv(), save(), load() - for sidebar profile
+        function openDiv() {
+            var profile = document.getElementById("total_result2");
+            var stepOne = document.getElementById("bmr_calculator_form")
+            if(profile.style.display === "none"){
+                stepOne.style.display = "none";
+                profile.style.display = "block";
+                document.getElementById("result_bmr").innerHTML = localStorage.getItem('resultBmr');
+                document.getElementById("bar_bmr").innerHTML = localStorage.getItem('barBmr');
+                document.getElementById("bar_calories").innerHTML = localStorage.getItem('barCalories');
+                document.getElementById("bar_carb_bmr").innerHTML = localStorage.getItem('barCarbBmr');
+                document.getElementById("bar_fat_bmr").innerHTML = localStorage.getItem('barFatBmr');
+                document.getElementById("bar_protein_bmr").innerHTML = localStorage.getItem('barProteinBmr');
+                document.getElementById("bar_carb").innerHTML = localStorage.getItem('barCarb');
+                document.getElementById("bar_fat").innerHTML = localStorage.getItem('barFat');
+                document.getElementById("bar_protein").innerHTML = localStorage.getItem('barProtein');
+            }
+        }
+
+        function save() {
+            openDiv();
+            var saveDiv = document.getElementById("total_result2");
+            if (saveDiv.style.display === "block") {
+                localStorage.setItem("isVisible", true);
+                localStorage.resultBmr = document.getElementById("result_bmr").innerHTML;
+                localStorage.barBmr = document.getElementById("bar_bmr").innerHTML;
+                localStorage.barCalories = document.getElementById("bar_calories").innerHTML;
+                localStorage.barCarbBmr = document.getElementById("bar_carb_bmr").innerHTML;
+                localStorage.barFatBmr = document.getElementById("bar_fat_bmr").innerHTML;
+                localStorage.barProteinBmr = document.getElementById("bar_protein_bmr").innerHTML;
+                localStorage.barCarb = document.getElementById("bar_carb").innerHTML;
+                localStorage.barFat = document.getElementById("bar_fat").innerHTML;
+                localStorage.barProtein = document.getElementById("bar_protein").innerHTML;
+            }
+        }
+
+        function load() {
+            var isVisible = localStorage.getItem("isVisible");
+            if (isVisible == "true") {
+                openDiv();
+            }
+        }
 
         $(document).ready(function(){
+            load();
+
             $(function(){
                 $('.auto_save').savy('load');
             });
+
             $('.selectpicker').selectpicker({
                 style: 'btn-default',
                 size: false,
@@ -143,10 +207,10 @@ function fill_select_box(){
                 var html = '';
 
                 html += '<tr>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="" selected disabled>Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="" selected disabled>Select Food</option></select></td>';
+                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="">Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
+                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="">Select Food</option></select></td>';
                 html += '<td><input name="item_weight" class="form-control item_weight selectpicker" data-sub_category_id="'+count+'" placeholder="Enter" type="number" min="0.01" step="0.01" id="item_weight'+count+'" required></td>';
-                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option value="" selected disabled>Select g/kg</option>\n' +
+                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option data-tokens="">Select g/kg</option>\n' +
                     '                        <option data-tokens="g">g</option>\n' +
                     '                        <option data-tokens="kg">kg</option></select></td>';
                 html += '<td><output class="item_emissions" id="item_emissions'+count+'"></output></td>'
@@ -191,13 +255,36 @@ function fill_select_box(){
             //validation
             $('#insert_form').on('submit',function(event){
                 event.preventDefault();
-                //var form_data = $(this).serialize();
-                //$('#item_table').find("tr:gt(0)").remove();
+            });
+
+            $('#insert_form_lunch').on('submit',function(event){
+                event.preventDefault();
+            });
+
+            $('#insert_form_dinner').on('submit',function(event){
+                event.preventDefault();
             });
 
             $('#bmr_calculator_form').on('submit',function(event){
                 event.preventDefault();
             });
+
+            var invalidClassName = 'invalid';
+            var inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(function (input) {
+                // Add a css class on submit when the input is invalid.
+                input.addEventListener('invalid', function () {
+                    input.classList.add(invalidClassName)
+                })
+
+                // Remove the class when the input becomes valid.
+                // 'input' will fire each time the user types
+                input.addEventListener('input', function () {
+                    if (input.validity.valid) {
+                        input.classList.remove(invalidClassName)
+                    }
+                })
+            })
 
             $(document).on('change', '.item_sub_category', function(){
                 var food_name = $(this).val();
@@ -251,6 +338,8 @@ function fill_select_box(){
                         $('#bar_carb').html(0+"&nbsp;g");
                         $('#bar_fat').html(0+"&nbsp;g");
                         $('#bar_protein').html(0+"&nbsp;g");
+                        save();
+
                     }
                 });
             });
@@ -273,11 +362,6 @@ function fill_select_box(){
                     } else if($('#insert_form')[0].checkValidity() === true && isValid===true) {
                         isValid = true;
 
-                        $(':required:invalid', '#insert_form').each(function () {
-                            var id = $('.tab-pane').find(':required:invalid').closest('.tab-pane').attr('id');
-
-                            $('.nav a[href="#' + id + '"]').tab('show');
-                        });
 
                         $('#total_result').css("display","block");
                         $('html,body').animate(
@@ -342,6 +426,9 @@ function fill_select_box(){
 
                         show_footprint(sum/1000); //tons
 
+                    }
+                    else {
+                        alert('Please fill in the field')
                     };
                 });
             });
@@ -693,133 +780,225 @@ function fill_select_box(){
     <meta name="theme-color" content="#ffffff">
 </head>
 <body id="top" class="meal_body">
-<!-- Header -->
-<header id="header" class="skel-layers-fixed">
-    <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
-    <nav id="nav">
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
-            <li><a href="meal_plan.php">Meal Planning</a></li>
-            <li><a href="recipes.php" class="active-page">Recipes</a></li>
-            <li><a href="facts.html" >Facts</a></li>
-            <li><a href="about_us.html">About Us</a></li>
-        </ul>
-    </nav>
-</header>
-<div class="breadcrumb container">
-    <a href="index.html">Home</a>&nbsp; >&nbsp;
-    <span>Recipes</span>
-</div>
-<!-- Banner -->
-<div class="container">
-    <div id="hamburgerBox"></div>
-    <div id="hamburgerBtn">&#9776 </div>
-</div>
-<div class="container">
-    <div id="recipeBanner">
-        <br><br><br><br>
-        <header class="major">
-            <h3 style="color:#ffffff; font-weight: bold;">Recipes</h3>
-            <p style="color: #ffffff">Eat healthy with low carbon footprint meals</p>
-        </header>
+    <!-- Header -->
+    <header id="header" class="skel-layers-fixed">
+        <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
+        <nav id="nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
+                <li><a href="meal_plan.php">Meal Planning</a></li>
+                <li><a href="recipes.php" class="active-page">Recipes</a></li>
+                <li><a href="facts.html" >Facts</a></li>
+                <li><a href="about_us.html">About Us</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="breadcrumb container">
+        <a href="index.html">Home</a>&nbsp; >&nbsp;
+        <span>Recipes</span>
+    </div>
+    <!-- Banner -->
+    <div class="container">
+        <div id="hamburgerBox"></div>
+        <div id="hamburgerBtn">&#9776 </div>
+    </div>
+    <div class="container">
+        <div id="recipeBanner">
+            <br><br><br><br>
+            <header class="major">
+                <h3 style="color:#ffffff; font-weight: bold;">Recipes</h3>
+                <p style="color: #ffffff">Eat healthy with low carbon footprint meals</p>
+            </header>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <nav id="navBar">
+            <div class="nav-brand">
+                <form method="post" id="bmr_calculator_form" style="display:block;">
+                    <p>STEP 1.<br>Check your daily energy requirements</p>
+                    <div id="form-group2" class="form-group2">
+                        <p class="bmr_form">Gender</p><br>
+                        <div class="first_label" style="display: inline-block;">
+                            <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
+                            <label for="male" style="color:#ffffff;">Male</label>
+                            <input class="auto_save" type="radio" id="female" name="gender" />
+                            <label for="female" style="color:#ffffff;">Female</label>
+                        </div><br>
+                        <p class="bmr_form">Height</p>
+                        <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
+
+                        <p class="bmr_form">Weight</p>
+                        <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
+                        <br>
+
+                        <p class="bmr_form">Age</p>
+                        <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
+                        <br>
+
+                        <p class="bmr_form">Activity</p>
+                        <select class="input_activity auto_save" name="activity" id="activity" required>
+                            <option class="input_activity auto_save" value="">Select activity level</option>
+                            <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
+                            <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
+                            <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
+                            <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
+                            <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
+                        </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
+                                             title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
+                        <!--class="btn btn-primary"-->
+                        <br><br>
+                        <input type="submit" name="submit" class="button alt" style="background-color: #ffffff" id="calories_button" value="SAVE PROFILE" />
+                        <hr class="major" />
+                    </div> <!--div form-group-->
+                </form>
+            </div>
+            <div class="result2" id="total_result2" style="display:none;">
+                <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
+                <ul class="actions">
+                    <li><a id="return_button" style="background-color: #ffffff" class="button alt">EDIT PROFILE</a></li>
+                </ul>
+
+                <p id="result_nutrient" style="display: none"></p>
+
+                <div>
+                    <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
+                </div>
+                <div>
+                    <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
+                    <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
+                </div>
+                <div class="progress-bar-energy">
+                    <div class="progress-bar-value"></div>
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+                <div>
+                    <p style="display: inline-block; margin: 0;">Carb&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
+                    <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
+                </div>
+                <div class="progress-bar-carb">
+                    <div class="progress-bar-value"></div>
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+
+                <div>
+                    <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
+                    <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
+                </div>
+                <div class="progress-bar-fat">
+                    <div class="progress-bar-value"></div>
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+                <div>
+                    <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
+                    <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
+                </div>
+                <div class="progress-bar-protein">
+                    <div class="progress-bar-value"></div>
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+            </div>
+        </nav>
+    </div>
+<div class="container align-center">
+    <div class="search-bar">
+        <input type="text" name="search" value="" autocomplete="off" id="myinput" onkeyup="searchFunction()" placeholder="Search recipe">
+    </div>
+    <div style="margin-top: 60px;">
+        <button style="display: inline-block" href="#" class="button small">ALL</button>
+        <button style="display: inline-block" href="#" class="button small">BREAKFAST</button>
+        <button style="display: inline-block" href="#" class="button small">LUNCH</button>
+        <button style="display: inline-block" href="#" class="button small">DINNER</button>
     </div>
 </div>
-<br>
-<div class="container">
-    <nav id="navBar">
-        <div class="nav-brand">
-            <form method="post" id="bmr_calculator_form" style="display:block;">
-                <p>STEP 1.<br>Check your daily energy requirements</p>
-                <div id="form-group2" class="form-group2">
-                    <p class="bmr_form">Gender</p><br>
-                    <div class="first_label" style="display: inline-block;">
-                        <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
-                        <label for="male" style="color:#ffffff;">Male</label>
-                        <input class="auto_save" type="radio" id="female" name="gender" />
-                        <label for="female" style="color:#ffffff;">Female</label>
-                    </div><br>
-                    <p class="bmr_form">Height</p>
-                    <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
+<div class="container align-center">
+    <ul id="recipe_wrapper" class="align-center">
+        <div class="row">
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="vegan_pistacio" src="images/recipe/Vegan Pistachio And Orange Baklava.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Vegan Pistachio And Orange Baklava</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="the_crispiest" src="images/recipe/The Crispiest Vegan Fish And Chips.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/>
+                    <img src="images/half_tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">The Crispiest Vegan Fish And Chips</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Broad Bean And Basil Risotto.jpg" class="image fit recipe_img" >
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Broad Bean And Basil Risotto</a>
+                </li>
+            </div>
 
-                    <p class="bmr_form">Weight</p>
-                    <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
-                    <br>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li" >
+                    <img id="broad_bean" src="images/recipe/Spicy Courgette Fritters.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Spicy Courgette Fritters</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Creamed Aubergine Wheat With Fried Sugar Snap Peas.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Creamed Aubergine Wheat With Fried Sugar Snap Peas</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li" >
+                    <img id="broad_bean" src="images/recipe/Roasted Veg And Chickpeas With A Parsley Crumb.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Roasted Veg And Chickpeas With A Parsley Crumb</a>
+                </li>
+            </div>
 
-                    <p class="bmr_form">Age</p>
-                    <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
-                    <br>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Herby Pea Pilaf.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Herby Pea Pilaf</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Onion Bhajis (Plain Flour Recipe).jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Onion Bhajis (Plain Flour Recipe)</a>
+                </li>
+            </div>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Spiced Couscous Salad With Crispy Spring Onions.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Spiced Couscous Salad With Crispy Spring Onions</a>
+                </li>
+            </div>
 
-                    <p class="bmr_form">Activity</p>
-                    <select class="input_activity auto_save" name="activity" id="activity" required>
-                        <option class="input_activity auto_save" value="">Select activity level</option>
-                        <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
-                        <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
-                        <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
-                        <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
-                        <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
-                    </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
-                                         title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
-                    <!--class="btn btn-primary"-->
-                    <br><br>
-                    <input type="submit" name="submit" class="button alt" style="background-color: #ffffff" id="calories_button" value="SAVE PROFILE" />
-                    <hr class="major" />
-                </div> <!--div form-group-->
-            </form>
+            <div class="col-4" style="align-items: center">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Smoked Tofu Kedgeree.jpg" class="image fit recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a class="recipe_a">Smoked Tofu Kedgeree</a>
+                </li>
+            </div>
         </div>
-        <div class="result2" id="total_result2" style="display:none;">
-            <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
-            <ul class="actions">
-                <li><a id="return_button" style="background-color: #ffffff" class="button alt">EDIT PROFILE</a></li>
-            </ul>
-
-            <p id="result_nutrient" style="display: none"></p>
-
-            <div>
-                <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
-            </div>
-            <div>
-                <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
-                <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
-            </div>
-            <div class="progress-bar-energy">
-                <div class="progress-bar-value"></div>
-                <div class="progress-bar-fill"></div>
-            </div>
-
-            <div>
-                <p style="display: inline-block; margin: 0;">Carb&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
-                <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
-            </div>
-            <div class="progress-bar-carb">
-                <div class="progress-bar-value"></div>
-                <div class="progress-bar-fill"></div>
-            </div>
-
-
-            <div>
-                <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
-                <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
-            </div>
-            <div class="progress-bar-fat">
-                <div class="progress-bar-value"></div>
-                <div class="progress-bar-fill"></div>
-            </div>
-
-            <div>
-                <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
-                <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
-            </div>
-            <div class="progress-bar-protein">
-                <div class="progress-bar-value"></div>
-                <div class="progress-bar-fill"></div>
-            </div>
-
-        </div>
-    </nav>
-
+    </ul>
 </div>
 
+
+<!--
 <div class="container">
     <div>
         <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>
@@ -924,7 +1103,7 @@ function fill_select_box(){
                 <h4 style="display: none" class="meal_planning">TOTAL AMOUNT OF NUTRIENT :&nbsp;</h4><br><h4 style="display: none" id="total_nutrient"></h4><h4 style="display: none" id="total_nutrient2"></h4><br>
 
 
-                <div id="footprint_image" style="display:none; text-align: center;"><!--http://www.globalstewards.org/reduce-carbon-footprint.htm-->
+                <div id="footprint_image" style="display:none; text-align: center;">
                     <img id="img_verylow" style="display: none; text-align: center" src="images/verylow.png" class="image" width="400">
                     <img id="img_low" style="display: none; text-align: center" src="images/low.png" class="image" width="400">
                     <img id="img_average" style="display: none; text-align: center" src="images/average.png" class="image" width="400">
@@ -936,12 +1115,7 @@ function fill_select_box(){
             </div>
         </div>
     </div>
-</div>
-
-<br>
-
-
-</div> 	<!-- 1st Container -->
+</div> -->
 
 <!-- Footer -->
 <footer id="footer">
