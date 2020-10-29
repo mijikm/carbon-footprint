@@ -1,7 +1,7 @@
 <?php
     define("DB_server","localhost");
     define("DB_user","root");
-    define("DB_password",""); //toor33
+    define("DB_password","toor33"); //toor33
     define("DB_name","phpmyadmin");
     function db_connect(){
         $connection = mysqli_connect(DB_server,DB_user,DB_password,DB_name);
@@ -101,17 +101,17 @@
                     size: false,
                     width: 'fit'
                 });
+            });
 
-                $("#findout").click(function(){
-
-                $('html,body').animate(
-                    {
-                        scrollTop:$('#chartRow').offset().top
-                    },
-                    'slow'
-                )
+            $(function(){
+                $("#down_button").click(function(){
+                    $('html,body').animate(
+                        {
+                            scrollTop:$('#what_next').offset().top
+                        },
+                        'slow'
+                    )
                 });
-
             });
         </script>
         <script type ="text/javascript">
@@ -171,9 +171,6 @@
                         }
                     } // inner for loop
                 } // end of for loop of food_arr
-                console.log(breakfast);
-                console.log(lunch);
-                console.log(dinner);
                 if (chartExist===true) {myChart.destroy();}
                 showfood();
             }
@@ -268,6 +265,7 @@
                                     return title;
                                 },
                                 label: function(tooltipItem, data){
+                                    tooltipItem.yLabel = Number(tooltipItem.yLabel).toFixed(2);
                                     return tooltipItem.yLabel +'kg';
                                 }
                             }
@@ -280,6 +278,7 @@
                 totalPetrol += "km";
                 document.getElementById("result_petrol").innerHTML = totalFoodPrint;
                 document.getElementById("result_car").innerHTML = totalPetrol;
+                document.getElementById("bar_chart_icon").style.display = "none";
                 document.getElementById("petrol").style.display = "block";
                 chartExist = true;
                 //reset
@@ -315,7 +314,6 @@
 						<li><a href="meal_plan.php">Meal Planning</a></li>
                         <li><a href="recipes.php">Recipes</a></li>
                         <li><a href="facts.html" >Facts</a></li>
-                        <li><a href="about_us.html">About Us</a></li>
 					</ul>
 				</nav>
 			</header>
@@ -334,21 +332,20 @@
                 </header>
             </div>
         </div>
-
 		<!-- Main -->
 			<div id="main" class="wrapper style1">
-                <div class="container align-center">
+                <div class="container">
                 <div class="row">
-                    <div class="12u">
-                        <p>What you eat is important to your carbon footprint.<br>Carbon footprint is the quantity of greenhouse gas in carbon dioxide equivalent (CO2e)<br>which is
+                    <div class="6u">
+                        <p>What you eat is important to your carbon footprint. Carbon footprint is the quantity of greenhouse gas in carbon dioxide equivalent (CO2e) which is
                             generated across the supply chain of the product. <br><br>
-                            Let's find out the carbon footprint based on your choice by entering what you eat for a day.
-                            <!--* Negative value can be observed when the carbon dioxide absorbed by the plant’s photosynthesis is more than that released by its respiration.-->
+                            Let's find out the carbon footprint based on your choice by entering what you eat for a day.&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
+                                                                                                                              title="Each food item is calculated per 100g"></span>
                         </p>
                         <form method="post" id="multiple_select_form">
 
                         </form>
-                            <h5 class="selectMenu">Breakfast</h5>
+                            <h4 class="selectMenu" style="color: #000000;">BREAKFAST</h4>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name1">
                                 <option data-tokens="">Select Fruits</option>
                                 <?php
@@ -359,7 +356,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name2">
-                                <option data-tokens="" disabled selected>Select Dairy</option>
+                                <option data-tokens="">Select Dairy</option>
                                 <?php
                                 foreach($dairyArr as $row) {
                                     $food_name = $row['food_name'];
@@ -368,7 +365,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name3">
-                                <option data-tokens="" disabled selected>Select Other</option>
+                                <option data-tokens="">Select Other</option>
                                 <?php
                                 foreach($breakfastArr as $row) {
                                     $food_name = $row['food_name'];
@@ -377,9 +374,9 @@
                                 ?>
                             </select>
                             <br><br>
-                            <h5 class="selectMenu">Lunch</h5>
+                            <h4 class="selectMenu" style="color: #000000;">LUNCH</h4>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name4">
-                                <option data-tokens="" disabled selected>Select Vegetables</option>
+                                <option data-tokens="">Select Vegetables</option>
                                 <?php
                                 foreach($vegeArr as $row) {
                                     $food_name = $row['food_name'];
@@ -388,7 +385,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name5">
-                                <option data-tokens="" disabled selected>Select Meats</option>
+                                <option data-tokens="">Select Meats</option>
                                 <?php
                                 foreach($meatArr as $row) {
                                     $food_name = $row['food_name'];
@@ -397,7 +394,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name6">
-                                <option data-tokens="" disabled selected>Select Other</option>
+                                <option data-tokens="">Select Other</option>
                                 <?php
                                 foreach($otherArr as $row) {
                                     $food_name = $row['food_name'];
@@ -406,9 +403,9 @@
                                 ?>
                             </select>
                             <br><br>
-                            <h5 class="selectMenu">Dinner</h5>
+                            <h4 class="selectMenu" style="color: #000000;">DINNER</h4>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name7">
-                                <option data-tokens="" disabled selected>Select Vegetables</option>
+                                <option data-tokens="">Select Vegetables</option>
                                 <?php
                                 foreach($vegeArr as $row) {
                                     $food_name = $row['food_name'];
@@ -417,7 +414,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name8">
-                                <option data-tokens=""  disabled selected>Select Meats</option>
+                                <option data-tokens="">Select Meats</option>
                                 <?php
                                 foreach($meatArr as $row) {
                                     $food_name = $row['food_name'];
@@ -426,7 +423,7 @@
                                 ?>
                             </select>
                             <select class="selectpicker" data-show-subtext="true" data-live-search="true" id="food_name9">
-                                <option data-tokens=""  disabled selected>Select Other</option>
+                                <option data-tokens="">Select Other</option>
                                 <?php
                                 foreach($otherArr as $row) {
                                     $food_name = $row['food_name'];
@@ -434,32 +431,47 @@
                                 }
                                 ?>
                             </select>
-                        <br><br><br>
+                        <br><br>
                         <ul class="actions">
-                            <li><a class="button alt" onclick="validateInput()" id="findout">Find out your footprint</a></li>
+                            <li><a class="button special" onclick="validateInput()" id="findout">Find out your footprint</a></li>
                         </ul>
-                    </div> <!-- 12u -->
-                </div> <!-- 1st row -->
-
-                <hr class="major" />
-                <div class="row" id="chartRow">
+                    </div> <!-- first 6u -->
+                    <div class="6u align-center" id="bar_chart_icon">
+                        <br><br><br>
+                        <img src="images/bar_chart_icon.png" width="150px"/></a><br><br>
+                        <p>Click on the <span style="font-weight: bold;">FIND OUT YOUR FOOTPRINT</span>&nbsp;button<br>to see your footprint</p>
+                    </div>
                     <div class="6u">
                         <canvas id="myChart" width="60" height="40"></canvas>
-                    </div>
-                    <div class="6u">
-                        <div id="petrol" style="display: none;"><br>
-                            <img src="images/foot_icon.png" width="50"/></a><p style="display: inline-block">Your daily carbon footprint is &nbsp;</p><p id="result_petrol" style="display: inline-block; font-weight:bold;"></p><br>
-                            <img src="images/car_icon.png" width="60"/></a><p style="display: inline-block">This is the equivalent of driving a medium petrol car&nbsp;</p><p id="result_car" style="display: inline-block; font-weight:bold;"></p>
+                        <div id="petrol" style="display: none;margin:0;"><br>
+                            <img src="images/foot_icon.png" width="40"/></a><p style="display: inline-block">&nbsp;Your daily carbon footprint is &nbsp;</p><p id="result_petrol" style="display: inline-block; font-weight:bold;"></p><br>
+                            <img src="images/car_icon.png" width="50"/></a><p style="display: inline-block">&nbsp;This is the equivalent of driving a medium petrol car&nbsp;</p><p id="result_car" style="display: inline-block; font-weight:bold;"></p><br>
+                            <img src="images/ideal_amount.png" width="50"/></a><p style="display: inline-block">&nbsp;The ideal daily carbon footprint is &nbsp;</p><p style="display: inline-block; font-weight:bold;">1.1kg</p><br>
+                            <div class="align-center" style="font-weight: bold;">
+                            <button id="down_button" class="btn btn-warning btn-sm">
+                                <span class="glyphicon glyphicon-menu-down"></span></button>&nbsp;&nbsp;Let's build your recipes!
+                            </div>
                         </div>
                     </div>
-                </div><br><br><br> <!--row-->
-                    <div class ="12u align-center carbonBanner">
-                        <a href="meal_plan.php" class="image effect"><img src="images/carbon_banner.png" width="500" alt="Meal Planning" /></a>
-                        <div class="centered">
-                            <a style="color: #ffffff" href="meal_plan.php">Let's build low foodprint recipes</a>
+                </div><br><br><br><br><br><br>
+                    <div class="align-left" id="what_next"><!--row-->
+                        <div class="row" style="padding: 0 5em 2em;">
+                            <div class="6u">
+                                <a style="font-size: 1.25em;color: #FD823E;display: inline-block" href="meal_plan.php">
+                                    Do you want to create recipes?
+                                </a>
+                                <p style="margin:0;">Use our Footprint Calculator to find out how many trees are required to offset your meal's carbon footprint.</p>
+                                <br>
+                            </div>
+                            <div class="6u">
+                                <a style="font-size: 1.25em;color: #FD823E;" href="recipes.php">
+                                    Do you want to see our recipes?
+                                </a>
+                                <p style="margin:0;">Show your care for the environment and communities across the World by offsetting your footprint with our carbon deficient meals.</p>
+                            </div>
                         </div>
                     </div>
-                </div> 	<!-- 1st Container -->
+                </div><br><br><br> 	<!-- 1st Container -->
             </div> 	<!-- main wrapper -->
 
 		<!-- Footer -->

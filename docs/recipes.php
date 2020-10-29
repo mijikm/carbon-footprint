@@ -1,19 +1,13 @@
 <?php
 define("DB_server","localhost");
 define("DB_user","root");
-define("DB_password",""); //toor33
+define("DB_password","toor33"); //toor33
 define("DB_name","phpmyadmin");
 function db_connect(){
     $connection = mysqli_connect(DB_server,DB_user,DB_password,DB_name);
     return $connection;
 };
 $db = db_connect();
-$emissionData = "SELECT * FROM combined_data WHERE nutrient='sum_emission' ORDER BY food_name ASC";
-$emissionQuery = mysqli_query($db,$emissionData);
-$emissionArray = array();
-foreach ($emissionQuery as $row) {
-    $emissionArray[] = $row;
-}
 
 $calorieData = "SELECT * FROM combined_data WHERE nutrient='Energy_kcal' ORDER BY food_name ASC";
 $calorieQuery = mysqli_query($db,$calorieData);
@@ -34,20 +28,6 @@ $recommendQuery = mysqli_query($db,$recommendData);
 $recommendArray = array();
 foreach ($recommendQuery as $row) {
     $recommendArray[] = $row;
-}
-
-$sql="SELECT DISTINCT(food_group) FROM combined_data ORDER BY food_group ASC";
-$result=mysqli_query($db,$sql);
-
-function fill_select_box(){
-    $db = db_connect();
-    $sql="SELECT DISTINCT(food_group) FROM combined_data ORDER BY food_group ASC";
-    $result=mysqli_query($db,$sql);
-    $output='';
-    while($row=mysqli_fetch_array($result)){
-        $output .='<option value="'.$row["food_group"].'">'.$row["food_group"].'</option>';
-    }
-    echo $output;
 }
 
 ?>
@@ -77,9 +57,11 @@ function fill_select_box(){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
     <script type="text/javascript">
-        // searchFucntion() is called when type in Search box
+        var globalValue = 50;
+        // searchFunction() is called when type in Search box
         function searchFunction() {
-            var input, filter, ul, li, a, i;
+            var match, input, filter, ul, li, a, i;
+            match = false;
             input = document.getElementById('myinput');
             filter = input.value.toUpperCase();
             ul = document.getElementById('recipe_wrapper');
@@ -88,78 +70,104 @@ function fill_select_box(){
             for(i=0; i<li.length;i++){
                 a= li[i].getElementsByTagName('a')[0];
                 if(a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    match = true;
                     li[i].style.display="";
                 }
                 else{
                     li[i].style.display='none';
                 }
             }
-        }
 
-        //use localStorage - openDiv(), save(), load() - for sidebar profile
-        function openDiv() {
-            var profile = document.getElementById("total_result2");
-            var stepOne = document.getElementById("bmr_calculator_form")
-            if(profile.style.display === "none"){
-                stepOne.style.display = "none";
-                profile.style.display = "block";
-                document.getElementById("result_bmr").innerHTML = localStorage.getItem('resultBmr');
-                document.getElementById("bar_bmr").innerHTML = localStorage.getItem('barBmr');
-                document.getElementById("bar_calories").innerHTML = localStorage.getItem('barCalories');
-                document.getElementById("bar_carb_bmr").innerHTML = localStorage.getItem('barCarbBmr');
-                document.getElementById("bar_fat_bmr").innerHTML = localStorage.getItem('barFatBmr');
-                document.getElementById("bar_protein_bmr").innerHTML = localStorage.getItem('barProteinBmr');
-                document.getElementById("bar_carb").innerHTML = localStorage.getItem('barCarb');
-                document.getElementById("bar_fat").innerHTML = localStorage.getItem('barFat');
-                document.getElementById("bar_protein").innerHTML = localStorage.getItem('barProtein');
+            /* show Recipe not available conditionally */
+            if (match === false) {
+                document.querySelector('.not-found').style.display='block';
+            } else {
+                document.querySelector('.not-found').style.display='none';
             }
-        }
+            globalValue = $('.recipe_main_container ul li:visible').length;
+            /*
+            $(function(){
+                recipe_visible_function = function(){}
+                if(globalValue < 1) {
+                    document.querySelector('.not-found').style.display='block';
+                } else {
+                    document.querySelector('.not-found').style.display='none';
+                }
+            });*/
+            console.log("searchfunction: " + globalValue);
 
-        function save() {
-            openDiv();
-            var saveDiv = document.getElementById("total_result2");
-            if (saveDiv.style.display === "block") {
-                localStorage.setItem("isVisible", true);
-                localStorage.resultBmr = document.getElementById("result_bmr").innerHTML;
-                localStorage.barBmr = document.getElementById("bar_bmr").innerHTML;
-                localStorage.barCalories = document.getElementById("bar_calories").innerHTML;
-                localStorage.barCarbBmr = document.getElementById("bar_carb_bmr").innerHTML;
-                localStorage.barFatBmr = document.getElementById("bar_fat_bmr").innerHTML;
-                localStorage.barProteinBmr = document.getElementById("bar_protein_bmr").innerHTML;
-                localStorage.barCarb = document.getElementById("bar_carb").innerHTML;
-                localStorage.barFat = document.getElementById("bar_fat").innerHTML;
-                localStorage.barProtein = document.getElementById("bar_protein").innerHTML;
-            }
-        }
-
-        function load() {
-            var isVisible = localStorage.getItem("isVisible");
-            if (isVisible == "true") {
-                openDiv();
-            }
         }
 
         $(document).ready(function(){
-            load();
 
-            $(function(){
-                $('.auto_save').savy('load');
+
+            // scroll to top
+            const toTop = document.querySelector(".to-top");
+            window.addEventListener("scroll",() => {
+                if(window.pageYOffset > 100) {
+                    toTop.classList.add("active");
+                } else {
+                    toTop.classList.remove("active");
+                }
+            })
+
+            //filtering button for ALL, BREAFKAST, LUNCH, DINNER
+            $('.recipe_type').click(function(){
+                searchFunction();
+                const value = $(this).attr('data-filter');
+                if (value == 'all') {
+                    $('.recipe_gallery').show('1000');
+                } else {
+                    $('.recipe_gallery').not('.'+value).hide('1000');
+                    $('.recipe_gallery').filter('.'+value).show('1000');
+                }
+
+                if($('.recipe_wrapper li:visible').length < 1) {
+                    document.querySelector('.not-found').style.display='block';
+                } else {
+                    document.querySelector('.not-found').style.display='none';
+                }
+
+                console.log("recipe_type: " + $('.recipe_main_container ul li:visible').length);
+            })
+
+            //add active class on selected item
+            $('.recipe_type').click(function(){
+                $(this).addClass('active').siblings().removeClass('active')
+            })
+            var isSorted = false;
+            // sort by tree
+            $('#sort-tree').click(function(){
+                if (isSorted == false) {
+                    $('.recipe_wrapper div').sort(function(a,b){
+                        return $(a).data('worth') - $(b).data('worth');
+                    }).appendTo('.recipe_wrapper')
+                    isSorted = true;
+                } else {
+                    $('.recipe_wrapper div').sort(function(a,b){
+                        return $(b).data('worth') - $(a).data('worth');
+                    }).appendTo('.recipe_wrapper')
+                    isSorted = false;
+                }
             });
+        })
 
-            $('.selectpicker').selectpicker({
-                style: 'btn-default',
-                size: false,
-                //width: 'fit'
-            });
+        $(document).ready(function(){
+            var count = 0;
+            var bmr;
+            var nutriArray;
+            //var isValid = false;
+            var recipeDict = {};
+            var recipeEnergy = 0;
+            var recipeCarbs = 0;
+            var recipeFat = 0;
+            var recipeProtein = 0;
+            var pbEnergy = 0;
+            var pbCarbs = 0;
+            var pbFat = 0;
+            var pbProtein = 0;
 
-            $('[data-toggle="tooltip"]').tooltip();
-            const hamburgerBtn = document.getElementById('hamburgerBtn');
-            const navBar = document.getElementById('navBar');
-            hamburgerBtn.addEventListener('click', () => {
-                console.log("Button clicked");
-                navBar.classList.toggle('open');
-            });
-
+            // initialise pb first
             class ProgressBar {
                 constructor(element, initialValue=0) {
                     this.valueElem = element.querySelector('.progress-bar-value');
@@ -171,16 +179,20 @@ function fill_select_box(){
                     if (newValue < 0) {
                         newValue = 0;
                     }
-                    if (newValue > 100) {
-                        newValue = 100;
-                    }
+
                     this.value=newValue;
                     this.update();
                 }
                 update () {
                     const percentage = this.value + "%";
-                    this.fillElem.style.width = percentage;
-                    this.valueElem.textContent = percentage;
+                    if (this.value > 100) {
+                        this.fillElem.style.width = "100%";
+                        this.valueElem.textContent = percentage;
+                    } else {
+                        this.fillElem.style.width = percentage;
+                        this.valueElem.textContent = percentage;
+                    }
+
                 }
             }
 
@@ -189,162 +201,120 @@ function fill_select_box(){
             const pb3 = new ProgressBar(document.querySelector('.progress-bar-fat'), 0);
             const pb4 = new ProgressBar(document.querySelector('.progress-bar-protein'), 0);
 
-            var count = 0;
-            var bmr;
-            var nutriArray;
-            var isValid = false;
-
-            $(document).on('click', '.add', function(){
-                var tab_id = $('.tab-content .active').attr('id');
-                if (tab_id==="breakfast_tab") {
-                    tab_id = "first_table";
-                } else if (tab_id ==="lunch_tab") {
-                    tab_id = "lunch_table";
-                } else if (tab_id === "dinner_tab") {
-                    tab_id = "dinner_table"
+            //use localStorage - openDiv(), save(), load() - for sidebar profile
+            function openDiv() {
+                var profile = document.getElementById("total_result2");
+                var stepOne = document.getElementById("bmr_calculator_form")
+                if(profile.style.display === "none"){
+                    stepOne.style.display = "none";
+                    profile.style.display = "block";
+                    document.getElementById("result_bmr").innerHTML = localStorage.getItem('resultBmr');
+                    document.getElementById("bar_bmr").innerHTML = localStorage.getItem('barBmr');
+                    document.getElementById("bar_carb_bmr").innerHTML = localStorage.getItem('barCarbBmr');
+                    document.getElementById("bar_fat_bmr").innerHTML = localStorage.getItem('barFatBmr');
+                    document.getElementById("bar_protein_bmr").innerHTML = localStorage.getItem('barProteinBmr');
+                    document.getElementById("bar_calories").innerHTML = localStorage.getItem('barCalories');
+                    document.getElementById("bar_carb").innerHTML = localStorage.getItem('barCarb');
+                    document.getElementById("bar_fat").innerHTML = localStorage.getItem('barFat');
+                    document.getElementById("bar_protein").innerHTML = localStorage.getItem('barProtein');
+                    pb1.setValue(parseFloat(localStorage.getItem('pbEnergy')));
+                    pb2.setValue(parseFloat(localStorage.getItem('pbCarbs')));
+                    pb3.setValue(parseFloat(localStorage.getItem('pbFat')));
+                    pb4.setValue(parseFloat(localStorage.getItem('pbProtein')));
+                    pbEnergy = parseFloat(localStorage.getItem('pbEnergy'));
+                    pbCarbs = parseFloat(localStorage.getItem('pbCarbs'));
+                    pbFat = parseFloat(localStorage.getItem('pbFat'));
+                    pbProtein = parseFloat(localStorage.getItem('pbProtein'));
+                    recipeEnergy = parseFloat(localStorage.getItem('recipeEnergy'));
+                    recipeCarbs = parseFloat(localStorage.getItem('recipeCarbs'));
+                    recipeFat = parseFloat(localStorage.getItem('recipeFat'));
+                    recipeProtein = parseFloat(localStorage.getItem('recipeProtein'));
+                    bmr = localStorage.getItem('bmr');
+                    nutriArray = JSON.parse(localStorage.getItem('nutriArray'));
+                    recipeDict = JSON.parse(localStorage.getItem('recipeDict'));
+                    $('#recipe_list').append(localStorage.getItem('recipeList'));
                 }
-                count++;
-                var html = '';
+            }
 
-                html += '<tr>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_category[]" class="form-control item_category selectpicker" id="item_category'+count+'" data-sub_category_id="'+count+'" required><option data-tokens="">Select Food Type</option><?php echo fill_select_box(); ?></select></td>';
-                html += '<td><select data-show-subtext="true" data-live-search="true" name="item_sub_category[]" class="form-control item_sub_category selectpicker" data-sub_category_id="'+count+'" id="item_sub_category'+count+'" required><option data-tokens="">Select Food</option></select></td>';
-                html += '<td><input name="item_weight" class="form-control item_weight selectpicker" data-sub_category_id="'+count+'" placeholder="Enter" type="number" min="0.01" step="0.01" id="item_weight'+count+'" required></td>';
-                html += '<td><select name="unit" id="unit'+count+'" class="form-control input_unit selectpicker" data-sub_category_id="'+count+'" required><option data-tokens="">Select g/kg</option>\n' +
-                    '                        <option data-tokens="g">g</option>\n' +
-                    '                        <option data-tokens="kg">kg</option></select></td>';
-                html += '<td><output class="item_emissions" id="item_emissions'+count+'"></output></td>'
-                html += '<td><output class="item_calories" id="item_calories'+count+'"></output></td>'
-                html += '<td><button type="button" name="remove" class="align-center btn btn-danger btn-xs remove"><span class="glyphicon glyphicon-minus"></span></button></td>';
-                $('#'+tab_id).append(html);
-                $('.selectpicker').selectpicker('refresh');
-                console.log(tab_id);
-
-            });
-
-
-            $(document).on('click','.remove', function(){
-                $(this).closest('tr').remove();
-                if ( $("#item_table tr").length < 2) {
-
-                    $('#total_result').css("display","none");
+            function save() {
+                openDiv();
+                var saveDiv = document.getElementById("total_result2");
+                if (saveDiv.style.display === "block") {
+                    localStorage.setItem("isVisible", true);
+                    localStorage.resultBmr = document.getElementById("result_bmr").innerHTML; //Male 22yrs 80kg Light Activity
+                    localStorage.barBmr = document.getElementById("bar_bmr").innerHTML; // user required calories (2502.59 kcal)
+                    localStorage.barCarbBmr = document.getElementById("bar_carb_bmr").innerHTML; // user required carb (450.45 kcal)
+                    localStorage.barFatBmr = document.getElementById("bar_fat_bmr").innerHTML; // user required fat (20.8 kcal)
+                    localStorage.barProteinBmr = document.getElementById("bar_protein_bmr").innerHTML; // user required protein (83.2 kcal)
+                    localStorage.barCalories = document.getElementById("bar_calories").innerHTML; //0 kcal
+                    localStorage.barCarb = document.getElementById("bar_carb").innerHTML; // 0g
+                    localStorage.barFat = document.getElementById("bar_fat").innerHTML; // 0g
+                    localStorage.barProtein = document.getElementById("bar_protein").innerHTML; // 0g
+                    localStorage.setItem("pbEnergy", pbEnergy);
+                    localStorage.setItem("pbCarbs", pbCarbs);
+                    localStorage.setItem("pbFat", pbFat);
+                    localStorage.setItem("pbProtein", pbProtein);
+                    pb1.setValue(parseFloat(localStorage.getItem('pbEnergy')));
+                    pb2.setValue(parseFloat(localStorage.getItem('pbCarbs')));
+                    pb3.setValue(parseFloat(localStorage.getItem('pbFat')));
+                    pb4.setValue(parseFloat(localStorage.getItem('pbProtein')));
+                    localStorage.setItem("bmr", bmr); // 2502.50
+                    localStorage.setItem("recipeEnergy", recipeEnergy);
+                    localStorage.setItem("recipeCarbs", recipeCarbs);
+                    localStorage.setItem("recipeFat", recipeFat);
+                    localStorage.setItem("recipeProtein", recipeProtein);
+                    localStorage.setItem("nutriArray", JSON.stringify(nutriArray)); // [required fat, required protein, x, x, x, x, required carb]
+                    localStorage.setItem("recipeDict",JSON.stringify(recipeDict)); //save it to recipeDict where all the recipe names exist; {"Vegan":["4","4","18","10"]}
                 }
+            }
+
+            function load() {
+                var isVisible = localStorage.getItem("isVisible");
+                if (isVisible == "true") { //if user has already saved the profile
+                    openDiv();
+                }
+            }
+
+            load();
+
+            $(function(){
+                $('.auto_save').savy('load');
             });
 
-            $(document).on('change','.item_category', function(){
-                var food_group = $(this).val();
-                var sub_category_id = $(this).data('sub_category_id');
-                $.ajax({
-                    url:"action_group.php",
-                    //send data to server with POST method
-                    method:"POST",
-                    data:{food_group: food_group},
-                    success:function(data){
-                        var html = '<option data-tokens = "" selected disabled>Select Food</option>';
-                        html += data;
-                        $('#item_sub_category'+sub_category_id).html(html);
-                        $('#item_weight'+sub_category_id).val("");
-                        $('#unit'+sub_category_id)[0].selectedIndex = 0;
-                        $('#item_emissions'+sub_category_id).html("");
-                        $('#item_calories'+sub_category_id).html("");
-                        $('.selectpicker').selectpicker('refresh');
-                    }
-
-                })
-            });
-            //validation
-            $('#insert_form').on('submit',function(event){
-                event.preventDefault();
-            });
-
-            $('#insert_form_lunch').on('submit',function(event){
-                event.preventDefault();
-            });
-
-            $('#insert_form_dinner').on('submit',function(event){
-                event.preventDefault();
+            $('[data-toggle="tooltip"]').tooltip();
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const navBar = document.getElementById('navBar');
+            hamburgerBtn.addEventListener('click', () => {
+                navBar.classList.toggle('open');
             });
 
             $('#bmr_calculator_form').on('submit',function(event){
                 event.preventDefault();
             });
 
-            var invalidClassName = 'invalid';
-            var inputs = document.querySelectorAll('input, select, textarea');
-            inputs.forEach(function (input) {
-                // Add a css class on submit when the input is invalid.
-                input.addEventListener('invalid', function () {
-                    input.classList.add(invalidClassName)
-                })
-
-                // Remove the class when the input becomes valid.
-                // 'input' will fire each time the user types
-                input.addEventListener('input', function () {
-                    if (input.validity.valid) {
-                        input.classList.remove(invalidClassName)
-                    }
-                })
-            })
-
-            $(document).on('change', '.item_sub_category', function(){
-                var food_name = $(this).val();
-                var sub_category_id = $(this).data('sub_category_id');
-                //if unit is chosen
-                if (($('#unit'+sub_category_id).val() != "") && ($('#item_weight'+sub_category_id).val() != "")) {
-                    var finals = [];
-                    var unit = $('#unit'+sub_category_id).val();
-                    var weight = $('#item_weight'+sub_category_id).val();
-                    finals = addIngredient(food_name, unit, weight);
-                    $('#item_emissions'+sub_category_id).html(finals[0]);
-                    $('#item_calories'+sub_category_id).html(finals[1]);
-                };
-            });
-
-            $(document).on('change', '.item_weight', function(){
-                var weight = $(this).val();
-                var sub_category_id = $(this).data('sub_category_id');
-                var food_name = $('#item_sub_category'+sub_category_id).val();
-                //if unit is chosen
-                if (($('#unit'+sub_category_id).val() != "") && ($('#item_sub_category'+sub_category_id).val() != "")) {
-                    var finals = [];
-                    var unit = $('#unit'+sub_category_id).val();
-                    finals = addIngredient(food_name, unit, weight);
-                    $('#item_emissions'+sub_category_id).html(finals[0]);
-                    $('#item_calories'+sub_category_id).html(finals[1]);
-                };
-            });
-
-            $(document).on('change', '.input_unit', function(){
-                var unit = $(this).val();
-                var sub_category_id = $(this).data('sub_category_id');
-                var food_name = $('#item_sub_category'+sub_category_id).val();
-                //if weight is entered
-                if ($('#item_weight'+sub_category_id).val() != "" && ($('#item_sub_category'+sub_category_id).val() != "")) {
-                    var finals = [];
-                    var weight = $('#item_weight'+sub_category_id).val();
-                    finals = addIngredient(food_name, unit, weight);
-                    $('#item_emissions'+sub_category_id).html(finals[0]);
-                    $('#item_calories'+sub_category_id).html(finals[1]);
-                };
-            });
-
+            // SAVE PROFILE button
             $(function(){
                 $("#calories_button").click(function(){
                     if($('#bmr_calculator_form')[0].checkValidity() === true){
-                        isValid = true;
                         bmr = calculate_calories();
                         nutriArray = calculate_nutrient(bmr);
-                        $('#bar_calories').html(0+"&nbsp;kcal");
-                        $('#bar_carb').html(0+"&nbsp;g");
-                        $('#bar_fat').html(0+"&nbsp;g");
-                        $('#bar_protein').html(0+"&nbsp;g");
+                        if(localStorage.barCalories === undefined) { //if nothing saved
+                            $('#bar_calories').html(0+"&nbsp;kcal");
+                            $('#bar_carb').html(0+"&nbsp;g");
+                            $('#bar_fat').html(0+"&nbsp;g");
+                            $('#bar_protein').html(0+"&nbsp;g");
+                        } else { //recalculate progress bar + percentage
+                            /* NEW */
+                            pbEnergy = Math.floor(recipeEnergy/bmr*100);
+                            pbCarbs = Math.floor(recipeCarbs/nutriArray[6]*100);
+                            pbFat = Math.floor(recipeFat/nutriArray[0]*100);
+                            pbProtein = Math.floor(recipeProtein/nutriArray[1]*100);
+                            /*END */
+                        }
                         save();
-
                     }
                 });
             });
-
-
 
             $(function(){
                 $("#return_button").click(function(){
@@ -353,95 +323,52 @@ function fill_select_box(){
                 });
             });
 
+            $("#recipe_list").on("click", '.delete', function() {
+                var temp = $(this).closest("div[data-id]").attr('data-id');
+                var requiredCarb = localStorage.getItem('barCarbBmr').match(/[0-9.]+/g);
+                var requiredFat = localStorage.getItem('barFatBmr').match(/[0-9.]+/g);
+                var requiredProtein = localStorage.getItem('barProteinBmr').match(/[0-9.]+/g);
+                var tempP1 = Number(recipeDict[temp][0]/bmr*100).toFixed(0); //energy %
+                var tempP2 = Number(recipeDict[temp][1]/requiredCarb*100).toFixed(0); //carbs %
+                var tempP3 = Number(recipeDict[temp][2]/requiredFat*100).toFixed(0); //fat %
+                var tempP4 = Number(recipeDict[temp][3]/requiredProtein*100).toFixed(0); //protein %
+                var itemCal = recipeDict[temp][0];
+                var itemCarb = recipeDict[temp][1];
+                var itemFat= recipeDict[temp][2];
+                var itemProtein= recipeDict[temp][3];
 
-            $(function(){
-                $("#calculate_button").click(function(){
-                    if(isValid===false){
-                        var text = "Please save your profile in STEP 1 first";
-                        alert(text);
-                    } else if($('#insert_form')[0].checkValidity() === true && isValid===true) {
-                        isValid = true;
+                pbEnergy -= parseFloat(tempP1);
+                pb1.setValue(tempP1);
+                pbCarbs -= parseFloat(tempP2);
+                pb2.setValue(tempP2);
+                pbFat -= parseFloat(tempP3);
+                pb3.setValue(tempP3);
+                pbProtein -= parseFloat(tempP4);
+                pb4.setValue(tempP4);
 
+                recipeEnergy -= itemCal
+                recipeEnergy = Number(recipeEnergy).toFixed(2);
+                recipeCarbs -= itemCarb;
+                recipeCarbs = Number(recipeCarbs).toFixed(2);
+                recipeFat -= itemFat;
+                recipeFat = Number(recipeFat).toFixed(2);
+                recipeProtein -= itemProtein;
+                recipeProtein = Number(recipeProtein).toFixed(2);
 
-                        $('#total_result').css("display","block");
-                        $('html,body').animate(
-                            {
-                                scrollTop:$('#total_result').offset().top
-                            },
-                            'slow'
-                        )
-                        //get the total gas emissions by each class
-                        var sum = 0;
-                        var cal = 0;
+                $('#bar_calories').html(recipeEnergy + "&nbsp;kcal");
+                $('#bar_carb').html(recipeCarbs + "&nbsp;g");
+                $('#bar_fat').html(recipeFat + "&nbsp;g");
+                $('#bar_protein').html(recipeProtein + "&nbsp;g");
 
-                        $('.item_emissions').each(function () {
-                            var text = $(this).text().match(/[0-9.]+/g);  // extract float from string
-                            sum += parseFloat(text);
-                        });
-                        $('#carbon_footprint').html(Number(sum/1000*365).toFixed(2) + " TONS");//annual
-                        $('#tree_num').html(Number(sum/1000*365/0.07).toFixed(0)); //annual tree
-                        $('#tree_num2').html(Number(sum/1000*365/0.07).toFixed(0));
+                delete recipeDict[temp];
 
-                        $('.item_calories').each(function () {
-                            var text = $(this).text().match(/[0-9.]+/g);  // extract float from string
-                            cal += parseFloat(text);
-                        });
-                        $('#total_calories').html(Number(cal).toFixed(2) + " kcal");
-                        $('#bar_calories').html(Number(cal).toFixed(2) + " kcal");
-                        var percent = Number(Number(cal).toFixed(2) / bmr * 100).toFixed(0);
-                        pb1.setValue(percent);
-
-                        var nutrientDict = {};
-                        //get the nutrient value
-                        $('.item_weight').each(function () {
-                            var sub_category_id = $(this).data('sub_category_id');
-                            var weight = $(this).val();
-                            var food_name = $('#item_sub_category' + sub_category_id).val();
-                            var metric = $('#unit' + sub_category_id).val();
-                            if (metric == "kg") {
-                                weight *= 1000; // change from kg to g by multiplying 1000
-                            }
-                            // check dictionary if food exists
-                            if (food_name in nutrientDict) {
-                                var existingAmount = parseFloat(nutrientDict[food_name]);
-                                weight = existingAmount + weight;
-                                nutrientDict[food_name] = Number(weight).toFixed(2); // round up to two decimal places
-                            } else {
-                                nutrientDict[food_name] = Number(weight).toFixed(2);
-                            }
-
-                        });
-                        var totalNutrient = checkNutrientData(nutrientDict);
-                        $('#bar_carb').html(totalNutrient[0] + "&nbsp;g");
-                        var percent = Number(totalNutrient[0] / (nutriArray[6]) * 100).toFixed(0);
-                        pb2.setValue(percent);
-
-                        $('#bar_fat').html(totalNutrient[1] + "&nbsp;g");
-                        var percent = Number(totalNutrient[1] / (nutriArray[0]) * 100).toFixed(0);
-                        pb3.setValue(percent);
-
-                        $('#bar_protein').html(totalNutrient[2] + "&nbsp;g");
-                        var percent = Number(totalNutrient[2] / (nutriArray[1]) * 100).toFixed(0);
-                        pb4.setValue(percent);
-
-                        show_footprint(sum/1000); //tons
-
-                    }
-                    else {
-                        alert('Please fill in the field')
-                    };
-                });
+                $(this).closest('.recipeDiv').remove();
+                var updateValue = document.getElementById('recipe_list').innerHTML;
+                localStorage.setItem("recipeList",updateValue); //update the recipe list div
+                save();
             });
+
         });
-
-        $(function(){
-            $("#bmr_button").click(function(){
-                var text = "Sorry, we are currently updating our site.";
-                alert(text);
-
-            });
-        });
-
     </script>
     <script type="text/javascript">
         var male = "";
@@ -452,7 +379,6 @@ function fill_select_box(){
         var isValid = true;
         var isValid2 = true;
         var rowExists = false;
-        var emissionData = <?php echo json_encode($emissionArray);?>;
         var calorieData =  <?php echo json_encode($calorieArray);?>;
         var nutrientData =  <?php echo json_encode($nutrientArray);?>;
         var recommendData = <?php echo json_encode($recommendArray);?>;
@@ -460,136 +386,7 @@ function fill_select_box(){
         var imgExists = false;
         var imgName = "";
 
-        // function add() or save() calls addIngredient()
-        function addIngredient(foodName, unitChosen, weight) {
-            var ingredient = foodName;
-            var unit = unitChosen;
-            var amount = weight;
-            var metric = "";
-            var emissionValue = "";
-            var calorie = "";
-            var finalValue = "";
-            var finalCalorie = "";
-
-            for(var i=0; i<emissionData.length;i++) {
-                //console.log(dataset[i]);
-                if(ingredient === emissionData[i].food_name) {
-                    emissionValue = emissionData[i].value;
-                } else {continue;}
-            }
-
-            for(var i=0; i<calorieData.length;i++) {
-                //console.log(dataset[i]);
-                if(ingredient === calorieData[i].food_name) {
-                    calorie = calorieData[i].value;
-                } else {continue;}
-            }
-
-            if (unit === "g") {
-                finalValue = amount / 100 * emissionValue;
-                finalValue = Number(finalValue).toFixed(2);
-                finalValue += " kg"; // greenhouse gases
-
-                finalCalorie = amount / 100 * calorie;
-                finalCalorie = Number(finalCalorie).toFixed(2);
-                metric = "g";
-                finalCalorie += " kcal"; // calories
-            } else if (unit === "kg") {
-                finalValue = amount * emissionValue * 10;
-                finalValue = Number(finalValue).toFixed(2);
-                finalValue += " kg"; // greenhouse gases
-
-                finalCalorie = amount * calorie * 10;
-                finalCalorie = Number(finalCalorie).toFixed(2);
-                metric = "kg";
-                finalCalorie += " kcal"; // calories
-            }
-            return [finalValue, finalCalorie];
-        }
-
-        function checkNutrientData(nutrientDict){
-            var carbDict = {};
-            var fatDict = {};
-            var proteinDict = {};
-            var vitADict = {};
-            var vitCDict = {};
-            var vitEDict = {};
-            var calciumDict = {};
-            var totalNutrient = []; // Carbohydrates, Fats, Proteins, Vitamin A, Vitamin C, Vitamin E, Calcium
-            // once we have a dictionary of Ingredient: amount (gram), go through nutrientData to get nutrient value
-            for (var item in nutrientDict) {
-                for (var k = 0; k < nutrientData.length; k++) {
-                    if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "Carb_g")) {
-                        carbDict[item] = Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "Fat_g")) {
-                        fatDict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "Protein_g")) {
-                        proteinDict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "VitA_mcg")) {
-                        vitADict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "VitC_mg")) {
-                        vitCDict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "VitE_mg")) {
-                        vitEDict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    } else if ((item === nutrientData[k].food_name) && (nutrientData[k].nutrient === "Calcium_mg")) {
-                        calciumDict[item] =  Number(nutrientDict[item] / 100 * nutrientData[k].value).toFixed(2);
-                    }
-                }
-            }
-            // totalNutrient; Carbohydrates, Fats, Proteins, Vitamin A, Vitamin C, Vitamin E, Calcium
-            var carbSum = 0;
-            var fatSum = 0;
-            var proteinSum = 0;
-            var vitASum = 0;
-            var vitCSum = 0;
-            var vitESum = 0;
-            var calciumSum = 0;
-            for (var item in carbDict){ carbSum += parseFloat(carbDict[item])};
-            for (var item in fatDict){ fatSum += parseFloat(fatDict[item])};
-            for (var item in proteinDict){ proteinSum += parseFloat(proteinDict[item])};
-            for (var item in vitADict){ vitASum += parseFloat(vitADict[item])};
-            for (var item in vitCDict){ vitCSum += parseFloat(vitCDict[item])};
-            for (var item in vitEDict){ vitESum += parseFloat(vitEDict[item])};
-            for (var item in calciumDict){ calciumSum += parseFloat(calciumDict[item])};
-
-            totalNutrient.push(Number(carbSum).toFixed(2), Number(fatSum).toFixed(2), Number(proteinSum).toFixed(2),
-                Number(vitASum).toFixed(2), Number(vitCSum).toFixed(2),Number(vitESum).toFixed(2), Number(calciumSum).toFixed(2));
-
-            document.getElementById("total_result").style.display="block";
-
-            return totalNutrient;
-        }
-
-        function show_footprint(totalGas){
-            //in tonnes
-            document.getElementById("tree_image").style.display="block";
-            document.getElementById("img_tree").style.display="block";
-            imgExists = true;
-
-        }
-
-        function onSelected(id){
-            document.getElementById(id).style.visibility ="hidden";
-        }
-
-        function checkRow () {
-            if (rowExists)
-            {
-                document.getElementById("calculate_button").style.visibility = "visible";
-
-            }
-            else {
-                document.getElementById("calculate_button").style.visibility = "hidden";
-                document.getElementById("total_result").style.display = "none";
-                document.getElementById("footprint_image").style.display = "none";
-                document.getElementById(imgName).style.display = "none";
-                imgExists = false;
-            }
-        }
-
         function calculate_calories() {
-            //valid2 = validateInput2();
-            //if(valid2==true) {
             var gender = "";
             var height = parseFloat(document.getElementById("height").value);
             var weight = parseFloat(document.getElementById("weight").value);
@@ -603,7 +400,6 @@ function fill_select_box(){
                 bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
                 bmr = bmr * activity;
                 bmr = Number(bmr).toFixed(2);
-                console.log(bmr);
             } else if (document.getElementById('female').checked) {
                 gender = "Female";
                 bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
@@ -630,7 +426,6 @@ function fill_select_box(){
                     return x.gender == "male";
                 });
                 userAge = document.getElementById('age').value;
-                //console.log(userAge);
                 maleArray = checkAge(userAge,tempArray);
                 nutriArray = checkNutrient(maleArray, bmr);
             } else if (document.getElementById('female').checked) {
@@ -688,7 +483,6 @@ function fill_select_box(){
                     return x.age_range == ">71";
                 });
             }
-            //console.log(genderArray);
             return genderArray;
         }
 
@@ -717,7 +511,6 @@ function fill_select_box(){
                     nutriCal = userArray[key].value;
                 }
             }
-
             nutriArray.push(nutriFat,nutriPro, nutriVA, nutriVC, nutriVE, nutriCal);
 
             //check activity and multiply value
@@ -740,10 +533,8 @@ function fill_select_box(){
                 nutriArray[i] *= nutriFactor; // multiply value times 2
                 nutriArray[i] = Number(nutriArray[i].toFixed(2));
             }
-
             // the last item of nutriArray is the range of carbs
             nutriArray.push(nutriCarbo);
-
             return nutriArray;
         }
 
@@ -780,342 +571,606 @@ function fill_select_box(){
     <meta name="theme-color" content="#ffffff">
 </head>
 <body id="top" class="meal_body">
-    <!-- Header -->
-    <header id="header" class="skel-layers-fixed">
-        <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
-        <nav id="nav">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
-                <li><a href="meal_plan.php">Meal Planning</a></li>
-                <li><a href="recipes.php" class="active-page">Recipes</a></li>
-                <li><a href="facts.html" >Facts</a></li>
-                <li><a href="about_us.html">About Us</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="breadcrumb container">
-        <a href="index.html">Home</a>&nbsp; >&nbsp;
-        <span>Recipes</span>
+<!-- Header -->
+<header id="header" class="skel-layers-fixed">
+    <h5 class="team_logo"><a href="index.html">Trailblazers</a></h5>
+    <nav id="nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="carbon_footprint.php">What's Your Footprint?</a></li>
+            <li><a href="meal_plan.php">Meal Planning</a></li>
+            <li><a href="recipes.php" class="active-page">Recipes</a></li>
+            <li><a href="facts.html" >Facts</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="breadcrumb container">
+    <a href="index.html">Home</a>&nbsp; >&nbsp;
+    <span>Recipes</span>
+</div>
+<!--scroll to top-->
+<a href="#" class="to-top">
+    <button id="to-top" class="btn"><span class="glyphicon glyphicon-chevron-up"></span></button>
+</a>
+<!-- Banner -->
+<div class="container">
+    <div id="hamburgerBox"></div>
+    <div id="hamburgerBtn">&#9776 </div>
+</div>
+<div class="container">
+    <div id="recipeBanner">
+        <br><br><br><br>
+        <header class="major">
+            <h3 style="color:#ffffff; font-weight: bold;">Recipes</h3>
+            <p style="color: #ffffff">Eat healthy with low carbon footprint vegetarian meals</p>
+        </header>
     </div>
-    <!-- Banner -->
-    <div class="container">
-        <div id="hamburgerBox"></div>
-        <div id="hamburgerBtn">&#9776 </div>
-    </div>
-    <div class="container">
-        <div id="recipeBanner">
-            <br><br><br><br>
-            <header class="major">
-                <h3 style="color:#ffffff; font-weight: bold;">Recipes</h3>
-                <p style="color: #ffffff">Eat healthy with low carbon footprint meals</p>
-            </header>
+</div>
+<br>
+<div class="container">
+    <nav id="navBar">
+        <div class="nav-brand">
+            <form method="post" id="bmr_calculator_form" style="display:block;">
+                <p style="font-weight: 500;">STEP 1.<br>Check your daily energy requirements</p>
+                <div id="form-group2" class="form-group2">
+                    <p class="bmr_form">Gender</p><br>
+                    <div class="first_label" style="display: inline-block;">
+                        <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
+                        <label for="male" style="color:#000000;">Male</label>
+                        <input class="auto_save" type="radio" id="female" name="gender" />
+                        <label for="female" style="color:#000000;">Female</label>
+                    </div><br>
+                    <p class="bmr_form">Height</p>
+                    <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
+
+                    <p class="bmr_form">Weight</p>
+                    <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
+                    <br>
+
+                    <p class="bmr_form">Age</p>
+                    <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
+                    <br>
+
+                    <p class="bmr_form">Activity</p>
+                    <select class="input_activity auto_save" name="activity" id="activity" required>
+                        <option class="input_activity auto_save" value="">Select activity level</option>
+                        <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
+                        <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
+                        <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
+                        <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
+                        <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
+                    </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
+                                         title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
+                    <!--class="btn btn-primary"-->
+                    <br><br><br>
+                    <input type="submit" name="submit" class="profile" id="calories_button" value="SAVE PROFILE" />
+                    <hr class="major" />
+                </div> <!--div form-group-->
+            </form>
         </div>
-    </div>
-    <br>
-    <div class="container">
-        <nav id="navBar">
-            <div class="nav-brand">
-                <form method="post" id="bmr_calculator_form" style="display:block;">
-                    <p>STEP 1.<br>Check your daily energy requirements</p>
-                    <div id="form-group2" class="form-group2">
-                        <p class="bmr_form">Gender</p><br>
-                        <div class="first_label" style="display: inline-block;">
-                            <input class="first_label auto_save" type="radio" id="male" name="gender" checked/>
-                            <label for="male" style="color:#ffffff;">Male</label>
-                            <input class="auto_save" type="radio" id="female" name="gender" />
-                            <label for="female" style="color:#ffffff;">Female</label>
-                        </div><br>
-                        <p class="bmr_form">Height</p>
-                        <input class="input_height auto_save" id="height" name="height" type="number" min="1" step="0.01" placeholder="cm" required><br>
+        <div class="result2" id="total_result2" style="display:none;">
+            <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
+            <ul class="actions">
+                <li><a id="return_button" class="button profile">EDIT PROFILE</a></li>
+            </ul>
 
-                        <p class="bmr_form">Weight</p>
-                        <input class="input_weight auto_save" id="weight" name="weight" type="number" min="1" step="0.01" placeholder="kg" required>
-                        <br>
+            <p id="result_nutrient" style="display: none"></p>
 
-                        <p class="bmr_form">Age</p>
-                        <input class="input_age auto_save" id="age" name="age"  type="number" min="1" step="1" placeholder="Enter age" required>
-                        <br>
-
-                        <p class="bmr_form">Activity</p>
-                        <select class="input_activity auto_save" name="activity" id="activity" required>
-                            <option class="input_activity auto_save" value="">Select activity level</option>
-                            <option class="input_activity auto_save" value="Sedentary">Sedentary: little to no exercise</option>
-                            <option class="input_activity auto_save" value="Light">Light: exercise 1-3 times per week</option>
-                            <option class="input_activity auto_save" value="Moderate">Moderate: exercise 4-5 times per week</option>
-                            <option class="input_activity auto_save" value="Very Active">Very active: intense exercise 6-7 times per week </option>
-                            <option class="input_activity auto_save" value="Extra Active">Extra active: very intense exercise daily</option>
-                        </select>&nbsp;<span class='glyphicon glyphicon-info-sign my-tooltip'
-                                             title="Exercise: 15-30 mins of elevated heart rate activity&#013;Intense: 45-120 mins of elevated heart rate activity&#013;Very intense: 2+ hrs of elevated heart rate activity"></span>
-                        <!--class="btn btn-primary"-->
-                        <br><br>
-                        <input type="submit" name="submit" class="button alt" style="background-color: #ffffff" id="calories_button" value="SAVE PROFILE" />
-                        <hr class="major" />
-                    </div> <!--div form-group-->
-                </form>
+            <div>
+                <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
             </div>
-            <div class="result2" id="total_result2" style="display:none;">
-                <p style="display: inline-block; margin-bottom:3px;color: black;">YOUR PROFILE</p><p id="result_bmr" style="display: inline-block; margin-bottom:5px;"></p>
-                <ul class="actions">
-                    <li><a id="return_button" style="background-color: #ffffff" class="button alt">EDIT PROFILE</a></li>
-                </ul>
-
-                <p id="result_nutrient" style="display: none"></p>
-
-                <div>
-                    <p style="display: inline-block; margin-bottom: 3px;color: black;">DAILY RECOMMENDATIONS</p>
-                </div>
-                <div>
-                    <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
-                    <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-energy">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Carb&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
-                    <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-carb">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
-                    <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-fat">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
-                <div>
-                    <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
-                    <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
-                </div>
-                <div class="progress-bar-protein">
-                    <div class="progress-bar-value"></div>
-                    <div class="progress-bar-fill"></div>
-                </div>
-
+            <div>
+                <p style="display:inline-block; margin: 0;">Energy&nbsp;</p><br>
+                <p id="bar_calories" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_bmr" style="display: inline-block; margin: 0;"></p>
             </div>
-        </nav>
-    </div>
+            <div class="progress-bar-energy">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div>
+                <p style="display: inline-block; margin: 0;">Carbs&nbsp;</p><span class='glyphicon glyphicon-info-sign my-tooltip' title="Carbohydrates"></span><br>
+                <p id="bar_carb" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_carb_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-carb">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div>
+                <p style="display: inline-block; margin: 0;">Fat&nbsp;</p><br> <!--pb3-->
+                <p id="bar_fat" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_fat_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-fat">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div>
+                <p style="display: inline-block; margin: 0;">Protein&nbsp;</p><br> <!--pb4-->
+                <p id="bar_protein" style="display: inline-block; margin: 0;"></p><p style="display: inline-block; margin: 0;">&nbsp;/&nbsp;</p><p id="bar_protein_bmr" style="display: inline-block; margin: 0;"></p>
+            </div>
+            <div class="progress-bar-protein">
+                <div class="progress-bar-value"></div>
+                <div class="progress-bar-fill"></div>
+            </div>
+            <hr style="margin-top: 1em;" class="minor" />
+            <p style="display: inline-block;font-weight: 500; margin-bottom:3px;color: #000000;">YOUR LIST</p>
+            <div id="recipe_list">
+            </div>
+        </div>
+    </nav>
+</div>
 <div class="container align-center">
     <div class="search-bar">
         <input type="text" name="search" value="" autocomplete="off" id="myinput" onkeyup="searchFunction()" placeholder="Search recipe">
     </div>
-    <div style="margin-top: 60px;">
-        <button style="display: inline-block" href="#" class="button small">ALL</button>
-        <button style="display: inline-block" href="#" class="button small">BREAKFAST</button>
-        <button style="display: inline-block" href="#" class="button small">LUNCH</button>
-        <button style="display: inline-block" href="#" class="button small">DINNER</button>
-    </div>
 </div>
-<div class="container align-center">
-    <ul id="recipe_wrapper" class="align-center">
-        <div class="row">
-            <div class="col-4" style="align-items: center">
+<div class="container align-center" style="margin-top: 60px;">
+    <ul id="recipe_type_ul" style="margin-bottom: 5px;">
+        <li class="recipe_type active" data-filter="all">ALL</li>
+        <li class="recipe_type" data-filter="breakfast">BREAKFAST</li>
+        <li class="recipe_type" data-filter="lunch">LUNCH</li>
+        <li class="recipe_type" data-filter="dinner">DINNER</li>
+    </ul>
+    <button class="button small" style="background: #FFAF11;color: #000000;" id="sort-tree">Sort by Carbon Footprint <img src="images/tree_icon.png" height="20"/></button>
+    <div class="not-found" style="display: none;">Recipe not available</div>
+</div>
+
+<div class="container align-center recipe_main_container">
+    <ul id="recipe_wrapper" class="align-center recipe_wrapper" style="vertical-align: top;text-align: left">
+        <a href="Vegan-Pistachio-And-Orange-Baklava.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
                 <li class="recipe_li">
-                    <img id="vegan_pistacio" src="images/recipe/Vegan Pistachio And Orange Baklava.jpg" class="image fit recipe_img">
+                    <img id="vegan_pistacio" src="images/recipe/Vegan Pistachio And Orange Baklava.jpg" class="image recipe_img">
                     <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Vegan Pistachio And Orange Baklava</a>
+                    <a href="Vegan-Pistachio-And-Orange-Baklava.php" class="recipe_a">Vegan Pistachio And Orange Baklava</a>
                 </li>
             </div>
-            <div class="col-4" style="align-items: center">
+        </a>
+        <a href="The-Crispiest-Vegan-Fish-And-Chips.php">
+            <div class="recipe_gallery lunch" data-worth="1.5">
                 <li class="recipe_li">
-                    <img id="the_crispiest" src="images/recipe/The Crispiest Vegan Fish And Chips.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/>
-                    <img src="images/half_tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">The Crispiest Vegan Fish And Chips</a>
-                </li>
-            </div>
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Broad Bean And Basil Risotto.jpg" class="image fit recipe_img" >
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Broad Bean And Basil Risotto</a>
-                </li>
-            </div>
-
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li" >
-                    <img id="broad_bean" src="images/recipe/Spicy Courgette Fritters.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/half_tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Spicy Courgette Fritters</a>
-                </li>
-            </div>
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Creamed Aubergine Wheat With Fried Sugar Snap Peas.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Creamed Aubergine Wheat With Fried Sugar Snap Peas</a>
-                </li>
-            </div>
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li" >
-                    <img id="broad_bean" src="images/recipe/Roasted Veg And Chickpeas With A Parsley Crumb.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Roasted Veg And Chickpeas With A Parsley Crumb</a>
-                </li>
-            </div>
-
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Herby Pea Pilaf.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Herby Pea Pilaf</a>
-                </li>
-            </div>
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Onion Bhajis (Plain Flour Recipe).jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Onion Bhajis (Plain Flour Recipe)</a>
-                </li>
-            </div>
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Spiced Couscous Salad With Crispy Spring Onions.jpg" class="image fit recipe_img">
-                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Spiced Couscous Salad With Crispy Spring Onions</a>
-                </li>
-            </div>
-
-            <div class="col-4" style="align-items: center">
-                <li class="recipe_li">
-                    <img id="broad_bean" src="images/recipe/Smoked Tofu Kedgeree.jpg" class="image fit recipe_img">
+                    <img id="the_crispiest" src="images/recipe/The Crispiest Vegan Fish And Chips.jpg" class="image recipe_img">
                     <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
-                    <a class="recipe_a">Smoked Tofu Kedgeree</a>
+                    <a href="The-Crispiest-Vegan-Fish-And-Chips.php" class="recipe_a">The Crispiest Vegan Fish And Chips</a>
                 </li>
             </div>
-        </div>
+        </a>
+        <a href="Broad-Bean-And-Basil-Risotto.php">
+            <div class="recipe_gallery lunch dinner" data-worth="3">
+                <li class="recipe_li">
+                    <img id="broad_bean" src="images/recipe/Broad Bean And Basil Risotto.jpg" class="image recipe_img" >
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Broad-Bean-And-Basil-Risotto.php" class="recipe_a">Broad Bean And Basil Risotto</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spicy-Courgette-Fritters.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="0.5">
+                <li class="recipe_li" >
+                    <img id="spicy_courgette" src="images/recipe/Spicy Courgette Fritters.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Spicy-Courgette-Fritters.php" class="recipe_a">Spicy Courgette Fritters</a>
+                </li>
+            </div>
+        </a>
+        <a href="Creamed-Aubergine-Wheat-With-Fried-Sugar-Snap-Peas.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="creamed_aubergine" src="images/recipe/Creamed Aubergine Wheat With Fried Sugar Snap Peas.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Creamed-Aubergine-Wheat-With-Fried-Sugar-Snap-Peas.php" class="recipe_a">Creamed Aubergine Wheat With Fried Sugar Snap Peas</a>
+                </li>
+            </div>
+        </a>
+        <a href="Roasted-Veg-And-Chickpeas-With-A-Parsley-Crumb.php">
+            <div class="recipe_gallery dinner" data-worth="3">
+                <li class="recipe_li" >
+                    <img id="roasted_veg" src="images/recipe/Roasted Veg And Chickpeas With A Parsley Crumb.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Roasted-Veg-And-Chickpeas-With-A-Parsley-Crumb.php" class="recipe_a">Roasted Veg And Chickpeas With A Parsley Crumb</a>
+                </li>
+            </div>
+        </a>
+        <a href="Herby-Pea-Pilaf.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1.5">
+                <li class="recipe_li">
+                    <img id="herby_pea" src="images/recipe/Herby Pea Pilaf.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Herby-Pea-Pilaf.php" class="recipe_a">Herby Pea Pilaf</a>
+                </li>
+            </div>
+        </a>
+        <a href="Onion-Bhajis-(Plain-Flour-Recipe).php">
+            <div class="recipe_gallery breakfast" data-worth="1">
+                <li class="recipe_li">
+                    <img id="onion_bhajis" src="images/recipe/Onion Bhajis (Plain Flour Recipe).jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Onion-Bhajis-(Plain-Flour-Recipe).php" class="recipe_a">Onion Bhajis (Plain Flour Recipe)</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spiced-Couscous-Salad-With-Crispy-Spring-Onions.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="spiced_couscous" src="images/recipe/Spiced Couscous Salad With Crispy Spring Onions.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Spiced-Couscous-Salad-With-Crispy-Spring-Onions.php" class="recipe_a">Spiced Couscous Salad With Crispy Spring Onions</a>
+                </li>
+            </div>
+        </a>
+        <a href="Smoked-Tofu-Kedgeree.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="1.5">
+                <li class="recipe_li">
+                    <img id="smoked_tofu" src="images/recipe/Smoked Tofu Kedgeree.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Smoked-Tofu-Kedgeree.php" class="recipe_a">Smoked Tofu Kedgeree</a>
+                </li>
+            </div>
+        </a>
+        <a href="Quick-Mushroom-And-Lentil-Ragu.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="quick_mushroom" src="images/recipe/Quick Mushroom And Lentil Ragu.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Quick-Mushroom-And-Lentil-Ragu.php" class="recipe_a">Quick Mushroom And Lentil Ragu</a>
+                </li>
+            </div>
+        </a>
+        <a href="Caribbean-Spiced-Spinach-Dhal.php">
+            <div class="recipe_gallery dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="caribbean_spiced" src="images/recipe/Caribbean Spiced Spinach Dhal.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Caribbean-Spiced-Spinach-Dhal.php" class="recipe_a">Caribbean Spiced Spinach Dhal</a>
+                </li>
+            </div>
+        </a>
+        <a href="The-Best-Vegan-Kentucky-Fried-Cauliflower.php">
+            <div class="recipe_gallery breakfast lunch" data-worth="3">
+                <li class="recipe_li">
+                    <img id="the_best_vegan" src="images/recipe/The Best Vegan Kentucky Fried Cauliflower.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="The-Best-Vegan-Kentucky-Fried-Cauliflower.php" class="recipe_a">The Best Vegan Kentucky Fried Cauliflower</a>
+                </li>
+            </div>
+        </a>
+        <a href="Apple-And-Rhubarb-Turnovers.php">
+            <div class="recipe_gallery breakfast" data-worth="2">
+                <li class="recipe_li">
+                    <img id="apple_and" src="images/recipe/Apple And Rhubarb Turnovers.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Apple-And-Rhubarb-Turnovers.php" class="recipe_a">Apple And Rhubarb Turnovers</a>
+                </li>
+            </div>
+        </a>
+        <a href="Mustardy-Potato-Salad-With-Rocket-And-Radish.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="mustardy_potato" src="images/recipe/Mustardy Potato Salad With Rocket And Radish.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Mustardy-Potato-Salad-With-Rocket-And-Radish.php" class="recipe_a">Mustardy Potato Salad With Rocket And Radish</a>
+                </li>
+            </div>
+        </a>
+        <a href="The-Best-Red-Cabbage-Ragu.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="the_best_red" src="images/recipe/The Best Red Cabbage Ragu.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="The-Best-Red-Cabbage-Ragu.php" class="recipe_a">The Best Red Cabbage Ragu</a>
+                </li>
+            </div>
+        </a>
+        <a href="Scrambled-Tofu-And-Tempeh-Bacon-Breakfast-Muffin.php">
+            <div class="recipe_gallery breakfast" data-worth="2">
+                <li class="recipe_li">
+                    <img id="scrambled_tofu" src="images/recipe/Scrambled Tofu And Tempeh Bacon Breakfast Muffin.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Scrambled-Tofu-And-Tempeh-Bacon-Breakfast-Muffin.php" class="recipe_a">Scrambled Tofu And Tempeh Bacon Breakfast Muffin</a>
+                </li>
+            </div>
+        </a>
+        <a href="20-Minute-Vegan-Banana-Cake.php">
+            <div class="recipe_gallery breakfast" data-worth="1.5">
+                <li class="recipe_li">
+                    <img id="20_minute" src="images/recipe/20 Minute Vegan Banana Cake.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="20-Minute-Vegan-Banana-Cake.php" class="recipe_a">20 Minute Vegan Banana Cake</a>
+                </li>
+            </div>
+        </a>
+        <a href="One-Pot-Pasta-With-A-Chickpea-And-Tomato-Sauce.php">
+            <div class="recipe_gallery breakfast lunch" data-worth="3">
+                <li class="recipe_li">
+                    <img id="one_pot" src="images/recipe/One Pot Pasta With A Chickpea And Tomato Sauce.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="One-Pot-Pasta-With-A-Chickpea-And-Tomato-Sauce.php" class="recipe_a">One Pot Pasta With A Chickpea And Tomato Sauce</a>
+                </li>
+            </div>
+        </a>
+        <a href="Quick-Mediterranean-Spiced-Rice.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="1.5">
+                <li class="recipe_li">
+                    <img id="quick_mediterranean" src="images/recipe/Quick Mediterranean Spiced Rice.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Quick-Mediterranean-Spiced-Rice.php" class="recipe_a">Quick Mediterranean Spiced Rice</a>
+                </li>
+            </div>
+        </a>
+        <a href="Simple-Vegan-Pesto.php">
+            <div class="recipe_gallery breakfast" data-worth="1">
+                <li class="recipe_li">
+                    <img id="simple_vegan" src="images/recipe/Simple Vegan Pesto.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Simple-Vegan-Pesto.php" class="recipe_a">Simple Vegan Pesto</a>
+                </li>
+            </div>
+        </a>
+        <a href="Blood-Orange-And-Hemp-Seed-Quinoa-Tabbouleh.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="blood_orange" src="images/recipe/Blood Orange And Hemp Seed Quinoa Tabbouleh.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Blood-Orange-And-Hemp-Seed-Quinoa-Tabbouleh.php" class="recipe_a">Blood Orange And Hemp Seed Quinoa Tabbouleh</a>
+                </li>
+            </div>
+        </a>
+        <a href="Molasses-Baked-Beans.php">
+            <div class="recipe_gallery breakfast" data-worth="1">
+                <li class="recipe_li">
+                    <img id="molasses" src="images/recipe/Molasses Baked Beans.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Molasses-Baked-Beans.php" class="recipe_a">Molasses Baked Beans</a>
+                </li>
+            </div>
+        </a>
+        <a href="Stovetop-Popcorn-With-A-Baked-Orange-Glaze.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="stovetop" src="images/recipe/Stovetop Popcorn With A Baked Orange Glaze.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Stovetop-Popcorn-With-A-Baked-Orange-Glaze.php" class="recipe_a">Stovetop Popcorn With A Baked Orange Glaze</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spinach-And-Kale-Saag-With-Spiced-Roast-Potatoes-And-Cauliflower.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="spinach" src="images/recipe/Spinach And Kale Saag With Spiced Roast Potatoes And Cauliflower.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Spinach-And-Kale-Saag-With-Spiced-Roast-Potatoes-And-Cauliflower.php" class="recipe_a">Spinach And Kale Saag With Spiced Roast Potatoes And Cauliflower</a>
+                </li>
+            </div>
+        </a>
+        <a href="Vegan-Rice-Pudding-With-Caramelized-Blood-Oranges-And-Pistachios.php">
+            <div class="recipe_gallery breakfast" data-worth="1">
+                <li class="recipe_li">
+                    <img id="vegan_rice" src="images/recipe/Vegan Rice Pudding With Caramelized Blood Oranges And Pistachios.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Vegan-Rice-Pudding-With-Caramelized-Blood-Oranges-And-Pistachios.php" class="recipe_a">Vegan Rice Pudding With Caramelized Blood Oranges And Pistachios</a>
+                </li>
+            </div>
+        </a>
+        <a href="Peanut-Glazed-Swede-With-Green-Cabbage-And-Chilli-Noodles.php">
+            <div class="recipe_gallery lunch dinner" data-worth="0.5">
+                <li class="recipe_li">
+                    <img id="peanut" src="images/recipe/Peanut Glazed Swede With Green Cabbage And Chilli Noodles.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Peanut-Glazed-Swede-With-Green-Cabbage-And-Chilli-Noodles.php" class="recipe_a">Peanut Glazed Swede With Green Cabbage And Chilli Noodles</a>
+                </li>
+            </div>
+        </a>
+        <a href="Baked-Black-Kale-Falafels.php">
+            <div class="recipe_gallery breakfast" data-worth="1">
+                <li class="recipe_li">
+                    <img id="baked_black_kale" src="images/recipe/Baked Black Kale Falafels.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Baked-Black-Kale-Falafels.php" class="recipe_a">Baked Black Kale Falafels</a>
+                </li>
+            </div>
+        </a>
+        <a href="Vegan-Banana-Pancakes-With-A-Smashed-Blueberry-Sauce.php">
+            <div class="recipe_gallery breakfast lunch" data-worth="1">
+                <li class="recipe_li">
+                    <img id="vegan_banana" src="images/recipe/Vegan Banana Pancakes With A Smashed Blueberry Sauce.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Vegan-Banana-Pancakes-With-A-Smashed-Blueberry-Sauce.php" class="recipe_a">Vegan Banana Pancakes With A Smashed Blueberry Sauce</a>
+                </li>
+            </div>
+        </a>
+        <a href="White-Wine-And-Mushroom-Cashew-Rigatoni-With-Steamed-Spring-Greens.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="white_wine" src="images/recipe/White Wine And Mushroom Cashew Rigatoni With Steamed Spring Greens.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="White-Wine-And-Mushroom-Cashew-Rigatoni-With-Steamed-Spring-Greens.php" class="recipe_a">White Wine And Mushroom Cashew Rigatoni With Steamed Spring Greens</a>
+                </li>
+            </div>
+        </a>
+        <a href="Speedy-Vegan-Chocolate-Mug-Cake.php">
+            <div class="recipe_gallery breakfast lunch" data-worth="4">
+                <li class="recipe_li">
+                    <img id="speedy_vegan" src="images/recipe/Speedy Vegan Chocolate Mug Cake.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Speedy-Vegan-Chocolate-Mug-Cake.php" class="recipe_a">Speedy Vegan Chocolate Mug Cake</a>
+                </li>
+            </div>
+        </a>
+        <a href="Sweet-Potato-Rosti-With-Smokey-Black-Beans-And-Blackened-Spring-Onion-Corn-And-Tomato-Salsa.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="sweet_potato" src="images/recipe/Sweet Potato Rosti With Smokey Black Beans And Blackened Spring Onion, Corn And Tomato Salsa.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Sweet-Potato-Rosti-With-Smokey-Black-Beans-And-Blackened-Spring-Onion-Corn-And-Tomato-Salsa.php" class="recipe_a">Sweet Potato Rosti With Smokey Black Beans And Blackened Spring Onion, Corn And Tomato Salsa</a>
+                </li>
+            </div>
+        </a>
+        <a href="Summer-Minestrone.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1.5">
+                <li class="recipe_li">
+                    <img id="summer" src="images/recipe/Summer Minestrone.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Summer-Minestrone.php" class="recipe_a">Summer Minestrone</a>
+                </li>
+            </div>
+        </a>
+        <a href="Roasted-Red-Pepper-And-Tomato-Bread-Soup.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="roasted_red" src="images/recipe/Roasted Red Pepper And Tomato Bread Soup.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Roasted-Red-Pepper-And-Tomato-Bread-Soup.php" class="recipe_a">Roasted Red Pepper And Tomato Bread Soup</a>
+                </li>
+            </div>
+        </a>
+        <a href="Buckwheat-And-Peach-Salad-With-French-Beans-And-Balsamic-Glaze.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="buckwheat" src="images/recipe/Buckwheat And Peach Salad With French Beans And Balsamic Glaze.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Buckwheat-And-Peach-Salad-With-French-Beans-And-Balsamic-Glaze.php" class="recipe_a">Buckwheat And Peach Salad With French Beans And Balsamic Glaze</a>
+                </li>
+            </div>
+        </a>
+        <a href="Braised-Courgettes-With-Haricot-Beans-And-Pistou.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="braised" src="images/recipe/Braised Courgettes With Haricot Beans And Pistou.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Braised-Courgettes-With-Haricot-Beans-And-Pistou.php" class="recipe_a">Braised Courgettes With Haricot Beans And Pistou</a>
+                </li>
+            </div>
+        </a>
+        <a href="Tomato-Galette-With-Garlic-Whipped-Tahini-And-Fried-Olives.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="tomato" src="images/recipe/Tomato Galette With Garlic Whipped Tahini And Fried Olives.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Tomato-Galette-With-Garlic-Whipped-Tahini-And-Fried-Olives.php" class="recipe_a">Tomato Galette With Garlic Whipped Tahini And Fried Olives</a>
+                </li>
+            </div>
+        </a>
+        <a href="Fresh-Tomato-And-White-Bean-Summer-Stew-With-Fried-Aubergine.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="fresh_tomato" src="images/recipe/Fresh Tomato And White Bean Summer Stew With Fried Aubergine.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Fresh-Tomato-And-White-Bean-Summer-Stew-With-Fried-Aubergine.php" class="recipe_a">Fresh Tomato And White Bean Summer Stew With Fried Aubergine</a>
+                </li>
+            </div>
+        </a>
+        <a href="Chillied-Rice-With-Zaatar-Roast-Chickpeas-And-Flat-Beans.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2.5">
+                <li class="recipe_li">
+                    <img id="chillied" src="images/recipe/Chillied Rice With Zaatar Roast Chickpeas And Flat Beans.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Chillied-Rice-With-Zaatar-Roast-Chickpeas-And-Flat-Beans.php" class="recipe_a">Chillied Rice With Zaatar Roast Chickpeas And Flat Beans</a>
+                </li>
+            </div>
+        </a>
+        <a href="Sticky-Chinese-Five-Spice-Vegetable-Stir-Fry.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="sticky" src="images/recipe/Sticky Chinese Five Spice Vegetable Stir Fry.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Sticky-Chinese-Five-Spice-Vegetable-Stir-Fry.php" class="recipe_a">Sticky Chinese Five Spice Vegetable Stir Fry</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spelt-And-Courgette-Summer-Soup.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="spelt" src="images/recipe/Spelt And Courgette Summer Soup.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Spelt-And-Courgette-Summer-Soup.php" class="recipe_a">Spelt And Courgette Summer Soup</a>
+                </li>
+            </div>
+        </a>
+        <a href="Moroccan-Spiced-Tomato-Lentils-With-Grilled-Courgettes.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="moroccan" src="images/recipe/Moroccan Spiced Tomato Lentils With Grilled Courgettes.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Moroccan-Spiced-Tomato-Lentils-With-Grilled-Courgettes.php" class="recipe_a">Moroccan Spiced Tomato Lentils With Grilled Courgettes</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spinach-And-Red-Pepper-Thai-Curry.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="spinach" src="images/recipe/Spinach And Red Pepper Thai Curry.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Spinach-And-Red-Pepper-Thai-Curry.php" class="recipe_a">Spinach And Red Pepper Thai Curry</a>
+                </li>
+            </div>
+        </a>
+        <a href="Balsamic-Roasted-Fennel-With-A-Bulgur-And-Herb-Salad.php">
+            <div class="recipe_gallery lunch dinner" data-worth="3">
+                <li class="recipe_li">
+                    <img id="balsamic" src="images/recipe/Balsamic Roasted Fennel With A Bulgur And Herb Salad.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Balsamic-Roasted-Fennel-With-A-Bulgur-And-Herb-Salad.php" class="recipe_a">Balsamic Roasted Fennel With A Bulgur And Herb Salad</a>
+                </li>
+            </div>
+        </a>
+        <a href="Heritage-Tomato-And-Couscous-Salad-With-Toasted-Thyme-Breadcrumbs.php">
+            <div class="recipe_gallery lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="heritage" src="images/recipe/Heritage Tomato And Couscous Salad With Toasted Thyme Breadcrumbs.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Heritage-Tomato-And-Couscous-Salad-With-Toasted-Thyme-Breadcrumbs.php" class="recipe_a">Heritage Tomato And Couscous Salad With Toasted Thyme Breadcrumbs</a>
+                </li>
+            </div>
+        </a>
+        <a href="Cashew-And-Wild-Garlic-Alfredo-With-Rigatoni.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="cashew" src="images/recipe/Cashew And Wild Garlic Alfredo With Rigatoni.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Cashew-And-Wild-Garlic-Alfredo-With-Rigatoni.php" class="recipe_a">Cashew And Wild Garlic Alfredo With Rigatoni</a>
+                </li>
+            </div>
+        </a>
+        <a href="Kale-And-Fresh-Mint-Soup.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="kale" src="images/recipe/Kale And Fresh Mint Soup.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Kale-And-Fresh-Mint-Soup.php" class="recipe_a">Kale And Fresh Mint Soup</a>
+                </li>
+            </div>
+        </a>
+        <a href="Spiced-Turnip-And-Chickpea-Couscous.php">
+            <div class="recipe_gallery lunch dinner" data-worth="1">
+                <li class="recipe_li">
+                    <img id="spiced" src="images/recipe/Spiced Turnip And Chickpea Couscous.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Spiced-Turnip-And-Chickpea-Couscous.php" class="recipe_a">Spiced Turnip And Chickpea Couscous</a>
+                </li>
+            </div>
+        </a>
+        <a href="Gigli-With-Salted-Purple-Sprouting-Broccoli.php">
+            <div class="recipe_gallery breakfast lunch dinner" data-worth="2">
+                <li class="recipe_li">
+                    <img id="gigli" src="images/recipe/Gigli With Salted Purple Sprouting Broccoli.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/tree_icon.png" height="20"/><img src="images/tree_icon.png" height="20"/><br>
+                    <a href="Gigli-With-Salted-Purple-Sprouting-Broccoli.php" class="recipe_a">Gigli With Salted Purple Sprouting Broccoli</a>
+                </li>
+            </div>
+        </a>
+        <a href="Homemade-Gnocchi.php">
+            <div class="recipe_gallery breakfast" data-worth="0.5">
+                <li class="recipe_li">
+                    <img id="homemade" src="images/recipe/Homemade Gnocchi.jpg" class="image recipe_img">
+                    <p class="recipe_tree" style="display: inline-block;margin: 0;">Tree&nbsp;</p><img src="images/half_tree_icon.png" height="20"/><br>
+                    <a href="Homemade-Gnocchi.php" class="recipe_a">Homemade Gnocchi</a>
+                </li>
+            </div>
+        </a>
     </ul>
 </div>
-
-
-<!--
-<div class="container">
-    <div>
-        <p>STEP 2. Build your meal plan by clicking the add button for each meal tab</p><br>
-    </div>
-    <h4 class="align-center">YOUR MEAL PLAN</h4>
-    <ul class="nav nav-tabs" >
-        <li class="active"><a data-toggle="tab" href="#breakfast_tab">BREAKFAST</a></li>
-        <li><a data-toggle="tab" href="#lunch_tab">LUNCH</a></li>
-        <li><a data-toggle="tab" href="#dinner_tab">DINNER</a></li>
-    </ul>
-    <div class="tab-content" style="margin-top: 10px;">
-        <div id="breakfast_tab" class="tab-pane fade in active">
-            <form method="post" id="insert_form">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="item_table">
-                        <thead>
-                        <tr>
-                            <th>Food Type</th>
-                            <th>Food</th>
-                            <th>Weight</th>
-                            <th>Unit</th>
-                            <th>Greenhouse Gases</th>
-                            <th>Calories</th>
-                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button></th>
-                        </tr>
-                        </thead>
-                        <tbody id="first_table"></tbody>
-                    </table>
-                </div>
-            </form>
-        </div>
-        <div id="lunch_tab" class="tab-pane fade">
-            <form method="post" id="insert_form_lunch">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="item_table_lunch">
-                        <thead>
-                        <tr>
-                            <th>Food Type</th>
-                            <th>Food</th>
-                            <th>Weight</th>
-                            <th>Unit</th>
-                            <th>Greenhouse Gases</th>
-                            <th>Calories</th>
-                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button></th>
-                        </tr>
-                        </thead>
-                        <tbody id="lunch_table"></tbody>
-                    </table>
-                </div>
-            </form>
-        </div>
-        <div id="dinner_tab" class="tab-pane fade">
-            <form method="post" id="insert_form_dinner">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="item_table_dinner">
-                        <thead>
-                        <tr>
-                            <th>Food Type</th>
-                            <th>Food</th>
-                            <th>Weight</th>
-                            <th>Unit</th>
-                            <th>Greenhouse Gases</th>
-                            <th>Calories</th>
-                            <th class="align-left"><button type="button" name="add" class="btn btn-success btn-xs add">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button></th>
-                        </tr>
-                        </thead>
-                        <tbody id="dinner_table"></tbody>
-                    </table>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div>
-        <p>STEP 3. Click on the CALCULATE FOODPRINT button to find out your carbon footprint</p><br>
-    </div>
-    <div class="align-center">
-        <input type="submit" name="submit" class="button alt" id="calculate_button" value="CALCULATE FOOTPRINT" />
-    </div><br>
-
-    <div class="row">
-        <div class="12u align-center">
-            <div class="result" id="total_result" style="display:none; padding-top: 60px;" >
-                <br>
-                <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;"> &nbsp;YOUR FOOTPRINT IS&nbsp;</h3>
-                <h3><span style="text-decoration: none; display: inline; border-bottom: 2px solid #44af92; color:#000000;" id="carbon_footprint"></span></h3><br>
-                <div id="tree_image" class="tree_image" style="display:none; text-align: center;">
-                    <img id="img_tree" style="display: none; text-align: center" src="images/trees.png" class="image" width="500">
-                    <h3 style="display: inline-block">It takes&nbsp;</h3><h3 style="display: inline-block; font-weight:bold;" id="tree_num"></h3>
-                    <h3 style="display: inline-block">trees to offset your annual footprint</h3><br>
-                    <p style="margin-bottom: 0;">On average, every tree absorbs 0.07 tons of CO2 annually.</p><p style="display: inline-block">Your footprint requires&nbsp;</p><p style="display: inline-block;font-weight:bold;" id="tree_num2"></p><p style="display: inline-block">&nbsp;trees per year.</p>
-                </div>
-                <ul class="actions">
-                    <li><a id="bmr_button" class="button alt bmr">Check out our recipes </a></li>
-                </ul>
-                <h4 style="display: none" class="meal_planning">CALORIES OF YOUR MEAL PLAN :&nbsp;</h4><h4 style="display: none" id="total_calories"></h4><br>
-                <h4 style="display: none" class="meal_planning">TOTAL AMOUNT OF NUTRIENT :&nbsp;</h4><br><h4 style="display: none" id="total_nutrient"></h4><h4 style="display: none" id="total_nutrient2"></h4><br>
-
-
-                <div id="footprint_image" style="display:none; text-align: center;">
-                    <img id="img_verylow" style="display: none; text-align: center" src="images/verylow.png" class="image" width="400">
-                    <img id="img_low" style="display: none; text-align: center" src="images/low.png" class="image" width="400">
-                    <img id="img_average" style="display: none; text-align: center" src="images/average.png" class="image" width="400">
-                    <img id="img_littlehigh" style="display: none; text-align: center" src="images/littlehigh.png" class="image" width="400">
-                    <img id="img_high" style="display: none; text-align: center" src="images/high.png" class="image" width="400">
-                    <img id="img_veryhigh" style="display: none; text-align: center" src="images/veryhigh.png" class="image" width="400">
-                    <br>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->
 
 <!-- Footer -->
 <footer id="footer">
